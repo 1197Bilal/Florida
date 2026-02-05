@@ -1,64 +1,82 @@
 import React, { useState } from "react";
 
 export default function Index() {
-  const [total, setTotal] = useState(0);
+  const [carrito, setCarrito] = useState<{nombre: string, precio: number, id: number}[]>([]);
+  
+  const total = carrito.reduce((acc, item) => acc + item.precio, 0);
 
-  const agregarProducto = (precio: number) => setTotal(total + precio);
+  const agregar = (nombre: string, precio: number) => {
+    setCarrito([...carrito, { nombre, precio, id: Date.now() }]);
+  };
+
+  const borrarTodo = () => setCarrito([]);
 
   return (
-    <div className="min-h-screen bg-slate-50 p-6 font-sans text-slate-900">
-      <header className="bg-indigo-700 text-white p-6 rounded-2xl shadow-xl mb-8 flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-extrabold tracking-tight">Florida POS</h1>
-          <p className="text-indigo-100 opacity-80 text-sm">Gestión de Ventas</p>
-        </div>
-        <div className="bg-white/20 px-6 py-3 rounded-xl backdrop-blur-md text-right">
-          <span className="text-xs uppercase font-bold block mb-1">Total a Cobrar</span>
-          <span className="text-4xl font-black">${total.toFixed(2)}</span>
-        </div>
+    <div className="h-screen w-full bg-slate-200 flex flex-col font-sans overflow-hidden">
+      {/* Cabecera */}
+      <header className="bg-slate-800 text-white p-2 flex justify-between items-center text-sm">
+        <span>Florida Café - TPV</span>
+        <span>05/02/2026</span>
       </header>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
-        <div className="lg:col-span-2 bg-white p-8 rounded-3xl shadow-sm border border-slate-200">
-          <h2 className="text-xl font-bold text-slate-800 mb-6 flex items-center border-b pb-4">
-            <span className="w-2 h-6 bg-indigo-500 rounded-full mr-3"></span>
-            Productos Disponibles
-          </h2>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-6">
-            <button onClick={() => agregarProducto(15)} className="group p-6 bg-white border-2 border-slate-100 rounded-2xl hover:border-indigo-500 hover:shadow-md transition-all text-center">
-               <div className="text-4xl mb-3">🍔</div>
-               <div className="font-bold text-slate-700">Menú A</div>
-               <div className="text-indigo-600 font-bold mt-1">$15.00</div>
-            </button>
-            <button onClick={() => agregarProducto(25)} className="group p-6 bg-white border-2 border-slate-100 rounded-2xl hover:border-indigo-500 hover:shadow-md transition-all text-center">
-               <div className="text-4xl mb-3">🍕</div>
-               <div className="font-bold text-slate-700">Menú B</div>
-               <div className="text-indigo-600 font-bold mt-1">$25.00</div>
-            </button>
-            <button onClick={() => agregarProducto(10)} className="group p-6 bg-white border-2 border-slate-100 rounded-2xl hover:border-indigo-500 hover:shadow-md transition-all text-center">
-               <div className="text-4xl mb-3">🥤</div>
-               <div className="font-bold text-slate-700">Bebida</div>
-               <div className="text-indigo-600 font-bold mt-1">$10.00</div>
-            </button>
+      <div className="flex flex-1 overflow-hidden">
+        {/* LADO IZQUIERDO: El Ticket (Como en tu foto) */}
+        <div className="w-1/3 bg-white border-r-2 border-slate-300 flex flex-col">
+          <div className="bg-indigo-100 p-2 font-bold text-xs border-b flex justify-between">
+            <span>Artículo</span>
+            <span>Importe</span>
+          </div>
+          <div className="flex-1 overflow-y-auto p-2 space-y-1">
+            {carrito.map((item) => (
+              <div key={item.id} className="flex justify-between text-sm border-b pb-1">
+                <span>{item.nombre}</span>
+                <span className="font-mono">{item.precio.toFixed(2)}</span>
+              </div>
+            ))}
+          </div>
+          <div className="bg-slate-100 p-4 border-t-2">
+            <div className="flex justify-between text-2xl font-black text-indigo-800">
+              <span>TOTAL</span>
+              <span>{total.toFixed(2)} €</span>
+            </div>
           </div>
         </div>
-        
-        <div className="bg-slate-900 text-white p-8 rounded-3xl shadow-2xl h-fit sticky top-6">
-          <h2 className="text-xl font-bold mb-6 text-indigo-300">Resumen de Caja</h2>
-          <div className="space-y-4">
-            <div className="flex justify-between border-b border-slate-800 pb-4">
-              <span className="text-slate-400">Estado</span>
-              <span className="text-green-400 font-bold">● Abierta</span>
-            </div>
-            <button onClick={() => setTotal(0)} className="w-full bg-slate-800 hover:bg-red-900/40 text-red-400 py-4 rounded-xl font-bold transition-colors border border-red-900/20">
-              Limpiar Carrito
+
+        {/* LADO DERECHO: Botones con fotos */}
+        <div className="w-2/3 p-4 overflow-y-auto bg-slate-100">
+          <div className="grid grid-cols-3 gap-4">
+            
+            {/* Producto 1: Café */}
+            <button onClick={() => agregar("Café Solo", 1.50)} className="bg-white p-2 rounded shadow hover:bg-indigo-50 border-b-4 border-indigo-500">
+              <img src="https://i.ibb.co/L6vV0rM/cafe.png" className="h-20 mx-auto object-contain" alt="Café" />
+              <div className="font-bold text-xs mt-2 uppercase">Café</div>
+              <div className="text-indigo-600 font-bold">1.50€</div>
             </button>
-            <button onClick={() => alert('Venta realizada por $' + total)} className="w-full bg-indigo-600 hover:bg-indigo-500 text-white py-4 rounded-xl font-bold shadow-lg shadow-indigo-500/30 transition-all">
-              Finalizar Venta
+
+            {/* Producto 2: Té */}
+            <button onClick={() => agregar("Té Moruno", 2.00)} className="bg-white p-2 rounded shadow hover:bg-indigo-50 border-b-4 border-green-500">
+              <img src="https://i.ibb.co/p3Yf1zQ/te.png" className="h-20 mx-auto object-contain" alt="Té" />
+              <div className="font-bold text-xs mt-2 uppercase">Té Moruno</div>
+              <div className="text-green-600 font-bold">2.00€</div>
             </button>
+
+            {/* Producto 3: Msemen */}
+            <button onClick={() => agregar("Msemen", 2.50)} className="bg-white p-2 rounded shadow hover:bg-indigo-50 border-b-4 border-orange-500">
+              <img src="https://i.ibb.co/Xz9W3Ym/msemen.png" className="h-20 mx-auto object-contain" alt="Msemen" />
+              <div className="font-bold text-xs mt-2 uppercase">Msemen</div>
+              <div className="text-orange-600 font-bold">2.50€</div>
+            </button>
+
           </div>
         </div>
       </div>
+
+      {/* BOTONES DE ACCIÓN (Abajo) */}
+      <footer className="bg-slate-800 p-2 flex gap-2">
+        <button onClick={borrarTodo} className="flex-1 bg-red-600 text-white font-bold py-4 rounded uppercase text-sm">Borrar Ticket</button>
+        <button className="flex-1 bg-blue-600 text-white font-bold py-4 rounded uppercase text-sm">Cuentas</button>
+        <button onClick={() => alert("Cobrando: " + total + "€")} className="flex-2 bg-green-600 text-white font-bold py-4 px-10 rounded uppercase text-xl shadow-lg">Cobrar</button>
+      </footer>
     </div>
   );
 }
