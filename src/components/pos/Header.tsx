@@ -1,0 +1,1 @@
+export const Header = ({ totalAmount }: any) => <div>Total: {totalAmount}</div>;

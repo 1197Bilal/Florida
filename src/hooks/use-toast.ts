@@ -1,0 +1,1 @@
+export const toast = (p: any) => console.log(p.title);

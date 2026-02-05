@@ -1,0 +1,1 @@
+export const ProductGrid = ({ products }: any) => <div>Grid de Productos</div>;

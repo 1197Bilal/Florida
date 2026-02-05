@@ -1,0 +1,1 @@
+export const ActionBar = ({ onUndo }: any) => <button onClick={onUndo}>Deshacer</button>;

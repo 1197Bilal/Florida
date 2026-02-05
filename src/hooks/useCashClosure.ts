@@ -1,0 +1,1 @@
+export const useCloseCash = () => ({ mutate: (s: any, c: any) => c.onSuccess(), isPending: false });
