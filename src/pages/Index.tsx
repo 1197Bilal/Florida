@@ -1,121 +1,60 @@
-import { useState } from "react";
-import { useProducts } from "@/hooks/useProducts";
-import { useTodaySales, useAddSale, useUndoLastSale, useDailySummary } from "@/hooks/useSales";
-import { useCloseCash } from "@/hooks/useCashClosure";
-import { Header } from "@/components/pos/Header";
-import { ProductGrid } from "@/components/pos/ProductGrid";
-import { ActionBar } from "@/components/pos/ActionBar";
-import { CashClosureDialog } from "@/components/pos/CashClosureDialog";
-import { toast } from "@/hooks/use-toast";
-import type { Product } from "@/types/pos";
+import React, { useState } from "react";
 
-const Index = () => {
-  const [isClosureDialogOpen, setIsClosureDialogOpen] = useState(false);
+export default function Index() {
+  const [total, setTotal] = useState(0);
 
-  const { data: products, isLoading: productsLoading } = useProducts();
-  const { data: sales, isLoading: salesLoading } = useTodaySales();
-  const addSale = useAddSale();
-  const undoLastSale = useUndoLastSale();
-  const closeCash = useCloseCash();
-
-  const summary = useDailySummary(sales);
-
-  // Create a map of product name -> quantity sold today
-  const productQuantities = new Map<string, number>();
-  summary.products.forEach((p) => {
-    productQuantities.set(p.name, p.quantity);
-  });
-
-  const handleAddProduct = (product: Product) => {
-    addSale.mutate(product, {
-      onSuccess: () => {
-        toast({
-          title: `+1 ${product.name}`,
-          description: `${product.price.toFixed(2)} MAD`,
-        });
-      },
-      onError: (error: any) => {
-        toast({
-          title: "Error al registrar venta",
-          description: error.message,
-          variant: "destructive",
-        });
-      },
-    });
-  };
-
-  const handleUndo = () => {
-    undoLastSale.mutate(undefined, {
-      onSuccess: () => {
-        toast({
-          title: "Venta anulada",
-          description: "Se ha eliminado la última venta",
-        });
-      },
-      onError: (error: any) => {
-        toast({
-          title: "Error",
-          description: error.message,
-          variant: "destructive",
-        });
-      },
-    });
-  };
-
-  const handleCloseCash = () => {
-    setIsClosureDialogOpen(true);
-  };
-
-  const handleConfirmClosure = () => {
-    closeCash.mutate(summary, {
-      onSuccess: () => {
-        toast({
-          title: "Caja cerrada",
-          description: `Total del día: ${summary.totalAmount.toFixed(2)} MAD`,
-        });
-        setIsClosureDialogOpen(false);
-      },
-      onError: (error: any) => {
-        toast({
-          title: "Error al cerrar caja",
-          description: error.message,
-          variant: "destructive",
-        });
-      },
-    });
-  };
+  const agregarProducto = (precio) => setTotal(total + precio);
 
   return (
-    <div className="min-h-screen bg-background pb-24">
-      <Header totalAmount={summary.totalAmount} totalItems={summary.totalItems} />
+    <div className="min-h-screen bg-slate-50 p-6 font-sans">
+      <header className="bg-indigo-700 text-white p-6 rounded-2xl shadow-xl mb-8 flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-extrabold tracking-tight">Florida POS</h1>
+          <p className="text-indigo-100 opacity-80">Gestión de Ventas</p>
+        </div>
+        <div className="bg-white/20 px-6 py-3 rounded-xl backdrop-blur-md">
+          <span className="text-sm uppercase font-bold block">Total a Cobrar</span>
+          <span className="text-4xl font-black">${total.toFixed(2)}</span>
+        </div>
+      </header>
 
-      <main className="container mx-auto px-4 py-6">
-        <ProductGrid
-          products={products}
-          productQuantities={productQuantities}
-          onAddProduct={handleAddProduct}
-          isLoading={productsLoading || salesLoading}
-          isAdding={addSale.isPending}
-        />
-      </main>
-
-      <ActionBar
-        onUndo={handleUndo}
-        onCloseCash={handleCloseCash}
-        canUndo={sales !== undefined && sales.length > 0}
-        canClose={summary.totalItems > 0}
-        isUndoing={undoLastSale.isPending}
-      />
-
-      <CashClosureDialog
-        open={isClosureDialogOpen}
-        onOpenChange={setIsClosureDialogOpen}
-        summary={summary}
-        onConfirm={handleConfirmClosure}
-        isClosing={closeCash.isPending}
-      />
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="lg:col-span-2 bg-white p-8 rounded-3xl shadow-sm border border-slate-200">
+          <h2 className="text-xl font-bold text-slate-800 mb-6 flex items-center">
+            <span className="w-2 h-6 bg-indigo-500 rounded-full mr-3"></span>
+            Productos Disponibles
+          </h2>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+            <button onClick={() => agregarProducto(15)} className="group p-6 bg-white border-2 border-slate-100 rounded-2xl hover:border-indigo-500 hover:shadow-md transition-all text-center">
+               <div className="text-2xl mb-2">🍔</div>
+               <div className="font-bold text-slate-700">Menú A</div>
+               <div className="text-indigo-600 font-bold">$15.00</div>
+            </button>
+            <button onClick={() => agregarProducto(25)} className="group p-6 bg-white border-2 border-slate-100 rounded-2xl hover:border-indigo-500 hover:shadow-md transition-all text-center">
+               <div className="text-2xl mb-2">🍕</div>
+               <div className="font-bold text-slate-700">Menú B</div>
+               <div className="text-indigo-600 font-bold">$25.00</div>
+            </button>
+            <button onClick={() => agregarProducto(10)} className="group p-6 bg-white border-2 border-slate-100 rounded-2xl hover:border-indigo-500 hover:shadow-md transition-all text-center">
+               <div className="text-2xl mb-2">🥤</div>
+               <div className="font-bold text-slate-700">Bebida</div>
+               <div className="text-indigo-600 font-bold">$10.00</div>
+            </button>
+          </div>
+        </div>
+        
+        <div className="bg-slate-900 text-white p-8 rounded-3xl shadow-2xl h-fit">
+          <h2 className="text-xl font-bold mb-6 text-indigo-300">Acciones</h2>
+          <div className="space-y-4">
+            <button onClick={() => setTotal(0)} className="w-full bg-slate-800 hover:bg-red-900/40 text-red-400 py-4 rounded-xl font-bold transition-colors border border-red-900/20">
+              Limpiar Carrito
+            </button>
+            <button onClick={() => alert('Venta realizada')} className="w-full bg-indigo-600 hover:bg-indigo-500 text-white py-4 rounded-xl font-bold shadow-lg shadow-indigo-500/30 transition-all">
+              Finalizar Venta
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   );
-};
-
-export default Index;
+}
