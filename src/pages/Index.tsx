@@ -316,21 +316,31 @@ export default function Index() {
           </div>
         </div>
 
-        <div className="w-2/3 p-4 bg-slate-300 overflow-y-auto grid grid-cols-2 lg:grid-cols-4 gap-4 content-start pb-20">
+        <div className="w-2/3 p-6 bg-slate-100 overflow-y-auto grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 content-start pb-24">
           {PRODUCTS.map((p) => (
-            <button key={p.name} onClick={() => agregar(p.name, p.price)} className={`bg-white p-3 rounded-2xl shadow-lg border-b-[10px] ${p.color} active:scale-95 transition-all group hover:bg-slate-50 relative overflow-hidden h-fit flex flex-col`}>
-              <div className="h-40 w-full flex items-center justify-center mb-4 overflow-hidden rounded-2xl bg-slate-100 shadow-inner">
-                <img src={p.image} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt={p.name} />
+            <button key={p.name} onClick={() => agregar(p.name, p.price)} className={`bg-white rounded-3xl shadow-sm hover:shadow-xl border-2 border-transparent hover:border-indigo-500 active:scale-95 transition-all group relative overflow-hidden flex flex-col h-full bg-gradient-to-b from-white to-slate-50`}>
+              <div className="aspect-square w-full overflow-hidden bg-slate-200">
+                <img src={p.image} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 aspect-square" alt={p.name} />
               </div>
-              <div className="text-xs font-black uppercase text-slate-800 tracking-tighter mb-1 mt-auto">{p.name}</div>
-              <div className="text-indigo-600 font-black text-2xl tracking-tighter">{p.price.toFixed(2)} <span className="text-[10px]">MAD</span></div>
+              <div className="p-4 flex flex-col flex-1 text-left">
+                <div className="text-[10px] font-black uppercase text-indigo-500 tracking-widest mb-1 opacity-80">{p.name.split(' ')[0]}</div>
+                <div className="text-sm font-black text-slate-800 uppercase leading-tight mb-2 flex-grow">{p.name}</div>
+                <div className="flex justify-between items-end">
+                  <div className="text-slate-400 text-[10px] font-bold">Importe:</div>
+                  <div className="text-indigo-600 font-black text-xl tracking-tighter">{p.price.toFixed(2)} <span className="text-[10px] ml-0.5">MAD</span></div>
+                </div>
+              </div>
+              <div className={`h-1.5 w-full ${p.color.replace('border-', 'bg-')}`}></div>
             </button>
           ))}
         </div>
       </div>
 
-      <footer className="bg-slate-800 p-6 shadow-[0_-15px_40px_rgba(0,0,0,0.3)] print:hidden relative z-10">
-        <button onClick={cobrar} className="w-full bg-emerald-500 hover:bg-emerald-400 text-white font-black py-6 rounded-3xl text-4xl shadow-2xl transition-all active:scale-95 uppercase tracking-tighter border-b-[8px] border-emerald-700">Finalizar y Cobrar</button>
+      <footer className="bg-slate-900 px-8 py-4 shadow-[0_-15px_40px_rgba(0,0,0,0.4)] print:hidden relative z-10 flex justify-center">
+        <button onClick={cobrar} className="w-full max-w-2xl bg-emerald-500 hover:bg-emerald-400 text-white font-black py-4 rounded-2xl text-2xl shadow-lg transition-all active:scale-95 uppercase tracking-widest border-b-[4px] border-emerald-700 flex items-center justify-center gap-3">
+          <span className="text-sm opacity-50 font-normal">Finalizar ticket y</span>
+          REALIZAR VENTA
+        </button>
       </footer>
     </div>
   );
