@@ -158,6 +158,24 @@ export default function Index() {
 
           {reportType === 'daily' ? (
             <div>
+              <div className="mb-6 p-4 bg-slate-50 border-2 border-slate-200 rounded-2xl">
+                <h3 className="text-xs font-black uppercase tracking-widest text-slate-400 mb-3 border-b pb-2">Resumen de Productos</h3>
+                <div className="grid grid-cols-2 gap-x-8 gap-y-2">
+                  {Object.entries(salesAtSelectedDate.reduce((acc: any, s) => {
+                    s.items.forEach(item => {
+                      acc[item.name] = (acc[item.name] || 0) + 1;
+                    });
+                    return acc;
+                  }, {})).sort().map(([name, qty]: [string, any]) => (
+                    <div key={name} className="flex justify-between text-sm border-b border-slate-100 pb-1">
+                      <span className="font-bold text-slate-700">{name}</span>
+                      <span className="font-black text-indigo-600">x{qty}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <h3 className="text-xs font-black uppercase tracking-widest text-slate-400 mb-2 mt-8">Detalle Cronológico</h3>
               <table className="w-full text-left">
                 <thead className="border-b-2 border-slate-300 uppercase text-[10px] font-black text-slate-400">
                   <tr>
@@ -169,10 +187,10 @@ export default function Index() {
                 <tbody className="text-sm">
                   {salesAtSelectedDate.map((s, idx) => (
                     <React.Fragment key={s.id}>
-                      <tr className="bg-slate-50 font-bold">
+                      <tr className="bg-slate-50 font-bold border-t border-slate-100">
                         <td className="py-2">{new Date(s.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</td>
                         <td>VENTA #{idx + 1}</td>
-                        <td className="text-right">{s.total.toFixed(2)} MAD</td>
+                        <td className="text-right font-black text-indigo-700">{s.total.toFixed(2)} MAD</td>
                       </tr>
                       {s.items.map((item, iidx) => (
                         <tr key={iidx} className="text-slate-500 text-[10px]">
@@ -185,8 +203,8 @@ export default function Index() {
                   ))}
                 </tbody>
               </table>
-              <div className="mt-8 pt-4 border-t-4 border-slate-800 flex justify-between items-center capitalize">
-                <span className="text-2xl font-black">Total del día:</span>
+              <div className="mt-8 pt-4 border-t-4 border-slate-800 flex justify-between items-center">
+                <span className="text-2xl font-black uppercase tracking-tighter">Total del día:</span>
                 <span className="text-4xl font-black">{totalAtSelectedDate.toFixed(2)} MAD</span>
               </div>
             </div>
