@@ -17,6 +17,6 @@ export const PRODUCTS: Product[] = [
     { name: "Msemen", price: 10.00, image: "https://images.unsplash.com/photo-1627308595229-7830a5c91f9f?w=600&auto=format&fit=crop", color: "border-yellow-600" },
     { name: "R3ayef (Meloui)", price: 10.00, image: "https://images.unsplash.com/photo-1599307734170-698f88f00007?w=600&auto=format&fit=crop", color: "border-orange-500" },
     { name: "Croissant", price: 10.00, image: "https://images.pexels.com/photos/3892469/pexels-photo-3892469.jpeg?auto=compress&cs=tinysrgb&w=600", color: "border-yellow-500" },
-    { name: "Huevos", price: 15.00, image: "https://images.pexels.com/photos/162712/egg-white-food-fried-162712.jpeg?auto=compress&cs=tinysrgb&w=600", color: "border-yellow-300" },
+    { name: "Huevos", price: 15.00, image: "https://images.pexels.com/photos/5945848/pexels-photo-5945848.jpeg?auto=compress&cs=tinysrgb&w=600", color: "border-yellow-300" },
 ];
 
