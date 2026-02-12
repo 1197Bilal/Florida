@@ -142,8 +142,10 @@ export default function Index() {
               <div key={item.id} className="flex justify-between p-3 border-b items-center animate-in fade-in slide-in-from-left-2 duration-200">
                 <button onClick={() => eliminarUno(item.id)} className="text-red-500 font-bold mr-2 text-lg">✕</button>
                 <div className="flex-1">
-                  <div className="text-base font-bold">{item.name}</div>
-                  <div className="text-[10px] text-slate-400 font-medium">{item.time}</div>
+                  <div className="text-base font-bold text-slate-800">{item.name}</div>
+                  <div className="flex items-center gap-1 text-[11px] text-indigo-500 font-bold bg-indigo-50 w-fit px-1.5 py-0.5 rounded-md mt-0.5">
+                    <span className="opacity-70">🕒</span> {item.time}
+                  </div>
                 </div>
                 <span className="font-black text-indigo-700 text-lg">{item.price.toFixed(2)} MAD</span>
               </div>
