@@ -13,6 +13,9 @@ export default function Index() {
   const [manualAmount, setManualAmount] = useState("");
   const [reportType, setReportType] = useState<"daily" | "monthly" | null>(null);
   const [reportFolder, setReportFolder] = useState<FileSystemDirectoryHandle | null>(null);
+  const [archiveReportText, setArchiveReportText] = useState<string | null>(null);
+  const [showArchive, setShowArchive] = useState(false);
+  const [loadingArchive, setLoadingArchive] = useState(false);
 
   useEffect(() => {
     fetchSales();
@@ -181,6 +184,24 @@ export default function Index() {
     }
   };
 
+  const verCierreGuardado = async () => {
+    setLoadingArchive(true);
+    setShowArchive(true);
+    const { data, error } = await supabase
+      .from('daily_summaries')
+      .select('report_text')
+      .eq('date', selectedDate)
+      .single();
+
+    if (error) {
+      console.warn("No se encontró reporte para esta fecha o error técnico:", error);
+      setArchiveReportText("No hay ningún reporte guardado para esta fecha en la nube.");
+    } else if (data) {
+      setArchiveReportText(data.report_text);
+    }
+    setLoadingArchive(false);
+  };
+
   const descargarReporteMensual = () => {
     const now = new Date();
     const month = now.getMonth() + 1;
@@ -213,6 +234,36 @@ export default function Index() {
 
   return (
     <div className="h-screen w-full bg-slate-200 flex flex-col font-sans overflow-hidden text-slate-900">
+      {/* ARCHIVE VIEWER OVERLAY */}
+      {showArchive && (
+        <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-[10000] flex items-center justify-center p-4">
+          <div className="bg-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+            <div className="bg-slate-800 p-4 text-white flex justify-between items-center">
+              <div>
+                <h3 className="font-black uppercase tracking-tighter text-lg">Archivo de Cierres 📚</h3>
+                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Fecha: {selectedDate}</p>
+              </div>
+              <button onClick={() => setShowArchive(false)} className="w-10 h-10 bg-slate-700 hover:bg-slate-600 rounded-xl transition-colors font-black">✕</button>
+            </div>
+            <div className="p-6 overflow-y-auto flex-1 bg-slate-50">
+              {loadingArchive ? (
+                <div className="flex flex-col items-center justify-center py-20 gap-4">
+                  <div className="w-12 h-12 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
+                  <p className="font-black text-slate-400 uppercase text-xs tracking-widest">Buscando en la nube...</p>
+                </div>
+              ) : (
+                <pre className="font-mono text-sm whitespace-pre-wrap bg-white p-4 rounded-xl border-2 border-slate-200 shadow-inner">
+                  {archiveReportText}
+                </pre>
+              )}
+            </div>
+            <div className="p-4 bg-slate-100 border-t flex justify-center">
+              <button onClick={() => setShowArchive(false)} className="bg-slate-800 text-white px-8 py-3 rounded-2xl font-black uppercase text-xs tracking-widest hover:bg-slate-700 transition-all active:scale-95 shadow-lg">Cerrar Visor</button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* PROFESSIONAL PRINT OVERLAY (Hidden on screen) */}
       {reportType && (
         <div className="fixed inset-0 bg-white z-[9999] p-8 print:block hidden text-slate-900 border-8 border-slate-100 h-full overflow-y-auto">
@@ -328,6 +379,12 @@ export default function Index() {
               className="bg-transparent text-sm font-black focus:outline-none cursor-pointer uppercase tracking-tighter"
             />
           </div>
+          <button
+            onClick={verCierreGuardado}
+            className="bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-400 border border-indigo-500/30 px-3 py-1.5 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all active:scale-95 flex items-center gap-2"
+          >
+            📚 VER CIERRE GUARDADO
+          </button>
         </div>
         <div className="flex gap-2">
           <button onClick={seleccionarCarpeta} className={`${reportFolder ? 'bg-emerald-600' : 'bg-orange-600'} hover:opacity-90 px-4 py-2 rounded-xl font-black text-xs shadow-lg transition-all active:scale-95 uppercase tracking-tighter flex items-center gap-2`}>
