@@ -1,25 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { PRODUCTS } from "../data/products";
 import { Sale } from "../types/pos";
-
-// Extended types for File System Access API
-interface FileSystemWritableFileStream extends WritableStream {
-  write(data: any): Promise<void>;
-  seek(position: number): Promise<void>;
-  truncate(size: number): Promise<void>;
-}
-
-interface FileSystemFileHandle extends FileSystemHandle {
-  readonly kind: 'file';
-  getFile(): Promise<File>;
-  createWritable(options?: { keepExistingData?: boolean }): Promise<FileSystemWritableFileStream>;
-}
-
-interface FileSystemDirectoryHandle extends FileSystemHandle {
-  readonly kind: 'directory';
-  getDirectoryHandle(name: string, options?: { create?: boolean }): Promise<FileSystemDirectoryHandle>;
-  getFileHandle(name: string, options?: { create?: boolean }): Promise<FileSystemFileHandle>;
-}
+import { supabase } from "../lib/supabaseClient";
 
 export default function Index() {
   const [carrito, setCarrito] = useState<{ name: string, price: number, id: number, time: string }[]>([]);
@@ -33,8 +15,21 @@ export default function Index() {
   const [reportFolder, setReportFolder] = useState<FileSystemDirectoryHandle | null>(null);
 
   useEffect(() => {
-    localStorage.setItem("florida_sales_history", JSON.stringify(salesHistory));
-  }, [salesHistory]);
+    fetchSales();
+  }, []);
+
+  const fetchSales = async () => {
+    const { data, error } = await supabase
+      .from('sales')
+      .select('*')
+      .order('timestamp', { ascending: true });
+
+    if (error) {
+      console.error('Error fetching sales:', error);
+    } else if (data) {
+      setSalesHistory(data);
+    }
+  };
 
   const totalTicket = carrito.reduce((acc: number, item: { price: number }) => acc + item.price, 0);
 
@@ -61,20 +56,39 @@ export default function Index() {
     setCarrito(carrito.filter((item: { id: number }) => item.id !== id));
   };
 
-  const cobrar = () => {
+  const cobrar = async () => {
     if (carrito.length === 0) return;
 
     const now = new Date();
+    const items = carrito.map((i: { name: string, price: number }) => ({ name: i.name, price: i.price }));
+
+    // Guardar en Supabase primero
+    const { data, error } = await supabase
+      .from('sales')
+      .insert([
+        {
+          timestamp: now.toISOString(),
+          items: items,
+          total: totalTicket
+        }
+      ])
+      .select();
+
+    if (error) {
+      console.error('Error guardando venta:', error);
+      alert("Error al guardar en la nube, pero se guardará localmente.");
+    }
+
     const newSale: Sale = {
-      id: Date.now(),
+      id: data ? data[0].id : Date.now(),
       timestamp: now.toISOString(),
-      items: carrito.map((i: { name: string, price: number }) => ({ name: i.name, price: i.price })),
+      items: items,
       total: totalTicket
     };
 
     setSalesHistory([...salesHistory, newSale]);
     setCarrito([]);
-    alert("Venta realizada con éxito ✅");
+    alert("Venta realizada y guardada en la nube ✅");
   };
 
   const printReport = (type: "daily" | "monthly") => {
@@ -117,56 +131,53 @@ export default function Index() {
   };
 
   const realizarCierre = async () => {
-    // Usar la fecha seleccionada en el calendario (selectedDate está en formato YYYY-MM-DD)
-    const dateParts = selectedDate.split('-');
-    const añoStr = dateParts[0];
-    const mesStr = dateParts[1];
-    const diaStr = dateParts[2]; // Mantiene el cero inicial si existe
+    const todaysSales = salesHistory.filter((s: Sale) => s.timestamp.startsWith(selectedDate));
+    const totalToday = todaysSales.reduce((acc: number, s: Sale) => acc + s.total, 0);
 
-    // Obtener nombre del mes desde la fecha seleccionada
-    // Añadimos T12:00:00 para evitar desajustes de zona horaria
+    const dateParts = selectedDate.split('-');
+    const diaStr = dateParts[2];
     const tempDate = new Date(selectedDate + "T12:00:00");
     const mesNombreRaw = tempDate.toLocaleDateString('es-ES', { month: 'long' });
     const mesNombre = mesNombreRaw.charAt(0).toUpperCase() + mesNombreRaw.slice(1);
 
-    const todaysSales = salesHistory.filter((s: Sale) => s.timestamp.startsWith(selectedDate));
-    const totalToday = todaysSales.reduce((acc: number, s: Sale) => acc + s.total, 0);
-
     let reportContent = `FLORIDA CAFÉ - CIERRE DE CAJA\n`;
-    reportContent += `Fecha Seleccionada: ${selectedDate}\n`;
-    reportContent += `Mes: ${mesNombre}\n`;
-    reportContent += `Día: ${diaStr}\n`;
+    reportContent += `Fecha: ${selectedDate}\nTotal: ${totalToday.toFixed(2)} MAD\n`;
     reportContent += `------------------------------------------\n`;
 
     todaysSales.forEach((sale: Sale, index: number) => {
-      const time = new Date(sale.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-      reportContent += `Venta #${index + 1} - ${time}\n`;
-      sale.items.forEach((item: { name: string, price: number }) => {
-        reportContent += `  - ${item.name}: ${item.price.toFixed(2)} MAD\n`;
-      });
-      reportContent += `  TOTAL: ${sale.total.toFixed(2)} MAD\n`;
-      reportContent += `------------------------------------------\n`;
+      reportContent += `Venta #${index + 1}: ${sale.total.toFixed(2)} MAD\n`;
     });
 
-    reportContent += `\nTOTAL DEL DÍA: ${totalToday.toFixed(2)} MAD\n`;
+    // 1. Guardar en Supabase (Tabla de resúmenes)
+    const { error: dbError } = await supabase
+      .from('daily_summaries')
+      .upsert({
+        date: selectedDate,
+        total_amount: totalToday,
+        sales_count: todaysSales.length,
+        report_text: reportContent
+      }, { onConflict: 'date' });
 
+    if (dbError) {
+      console.error('Error al guardar resumen en Supabase:', dbError);
+    } else {
+      alert(`Cierre del ${selectedDate} guardado en la nube ☁️✅`);
+    }
+
+    // 2. Guardar en carpeta local (Opcional, si está configurada)
     if (reportFolder) {
       try {
-        const yearFolder = await reportFolder.getDirectoryHandle(añoStr, { create: true });
+        const añoStr = dateParts[0];
+        const yearFolder = await (reportFolder as any).getDirectoryHandle(añoStr, { create: true });
         const monthFolder = await yearFolder.getDirectoryHandle(mesNombre, { create: true });
         const fileHandle = await monthFolder.getFileHandle(`dia_${diaStr}.txt`, { create: true });
         const writable = await (fileHandle as any).createWritable();
         await writable.write(reportContent);
         await writable.close();
-        alert(`Cierre guardado en: ${añoStr}/${mesNombre}/dia_${diaStr}.txt ✅`);
+        alert(`También guardado en copia local: ${añoStr}/${mesNombre}/dia_${diaStr}.txt ✅`);
       } catch (err: any) {
-        console.error("Error al guardar en carpeta:", err);
-        descargarTXTParaFichero(`cierre_${selectedDate}.txt`, reportContent);
-        alert("Error al guardar en carpeta. Se ha descargado el archivo normalmente.");
+        console.error("Error al guardar copia local:", err);
       }
-    } else {
-      descargarTXTParaFichero(`cierre_${selectedDate}.txt`, reportContent);
-      alert(`Cierre realizado y descargado. Total: ${totalToday.toFixed(2)} MAD\n(Configura una carpeta para guardado automático)`);
     }
   };
 
