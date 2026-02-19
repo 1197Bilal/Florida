@@ -36,7 +36,7 @@ export default function Index() {
     localStorage.setItem("florida_sales_history", JSON.stringify(salesHistory));
   }, [salesHistory]);
 
-  const totalTicket = carrito.reduce((acc: number, item) => acc + item.price, 0);
+  const totalTicket = carrito.reduce((acc: number, item: { price: number }) => acc + item.price, 0);
 
   const agregar = (name: string, price: number) => {
     const now = new Date();
@@ -117,19 +117,25 @@ export default function Index() {
   };
 
   const realizarCierre = async () => {
-    const now = new Date();
-    const today = now.toISOString().split('T')[0];
-    const todaysSales = salesHistory.filter((s: Sale) => s.timestamp.startsWith(today));
+    // Usar la fecha seleccionada en el calendario (selectedDate está en formato YYYY-MM-DD)
+    const dateParts = selectedDate.split('-');
+    const añoStr = dateParts[0];
+    const mesStr = dateParts[1];
+    const diaStr = dateParts[2]; // Mantiene el cero inicial si existe
+
+    // Obtener nombre del mes desde la fecha seleccionada
+    // Añadimos T12:00:00 para evitar desajustes de zona horaria
+    const tempDate = new Date(selectedDate + "T12:00:00");
+    const mesNombreRaw = tempDate.toLocaleDateString('es-ES', { month: 'long' });
+    const mesNombre = mesNombreRaw.charAt(0).toUpperCase() + mesNombreRaw.slice(1);
+
+    const todaysSales = salesHistory.filter((s: Sale) => s.timestamp.startsWith(selectedDate));
     const totalToday = todaysSales.reduce((acc: number, s: Sale) => acc + s.total, 0);
 
-    const añoStr = now.getFullYear().toString();
-    const mesNombre = now.toLocaleDateString('es-ES', { month: 'long' });
-    const diaNum = now.getDate();
-
     let reportContent = `FLORIDA CAFÉ - CIERRE DE CAJA\n`;
-    reportContent += `Fecha: ${today}\n`;
+    reportContent += `Fecha Seleccionada: ${selectedDate}\n`;
     reportContent += `Mes: ${mesNombre}\n`;
-    reportContent += `Día: ${diaNum}\n`;
+    reportContent += `Día: ${diaStr}\n`;
     reportContent += `------------------------------------------\n`;
 
     todaysSales.forEach((sale: Sale, index: number) => {
@@ -148,18 +154,18 @@ export default function Index() {
       try {
         const yearFolder = await reportFolder.getDirectoryHandle(añoStr, { create: true });
         const monthFolder = await yearFolder.getDirectoryHandle(mesNombre, { create: true });
-        const fileHandle = await monthFolder.getFileHandle(`dia_${diaNum}.txt`, { create: true });
+        const fileHandle = await monthFolder.getFileHandle(`dia_${diaStr}.txt`, { create: true });
         const writable = await (fileHandle as any).createWritable();
         await writable.write(reportContent);
         await writable.close();
-        alert(`Cierre guardado en: ${añoStr}/${mesNombre}/dia_${diaNum}.txt ✅`);
+        alert(`Cierre guardado en: ${añoStr}/${mesNombre}/dia_${diaStr}.txt ✅`);
       } catch (err: any) {
         console.error("Error al guardar en carpeta:", err);
-        descargarTXTParaFichero(`cierre_${today}.txt`, reportContent);
+        descargarTXTParaFichero(`cierre_${selectedDate}.txt`, reportContent);
         alert("Error al guardar en carpeta. Se ha descargado el archivo normalmente.");
       }
     } else {
-      descargarTXTParaFichero(`cierre_${today}.txt`, reportContent);
+      descargarTXTParaFichero(`cierre_${selectedDate}.txt`, reportContent);
       alert(`Cierre realizado y descargado. Total: ${totalToday.toFixed(2)} MAD\n(Configura una carpeta para guardado automático)`);
     }
   };
