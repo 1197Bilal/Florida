@@ -11,6 +11,7 @@ export default function Index() {
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
   const [manualAmount, setManualAmount] = useState("");
   const [reportType, setReportType] = useState<"daily" | "monthly" | null>(null);
+  const [reportFolder, setReportFolder] = useState<FileSystemDirectoryHandle | null>(null);
 
   useEffect(() => {
     localStorage.setItem("florida_sales_history", JSON.stringify(salesHistory));
@@ -85,13 +86,30 @@ export default function Index() {
     document.body.removeChild(element);
   };
 
-  const realizarCierre = () => {
-    const today = new Date().toISOString().split('T')[0];
+  const seleccionarCarpeta = async () => {
+    try {
+      const handle = await (window as any).showDirectoryPicker();
+      setReportFolder(handle);
+      alert("Carpeta de reportes configurada correctamente 📂");
+    } catch (err) {
+      console.error("Error al seleccionar carpeta:", err);
+      alert("No se pudo seleccionar la carpeta.");
+    }
+  };
+
+  const realizarCierre = async () => {
+    const now = new Date();
+    const today = now.toISOString().split('T')[0];
     const todaysSales = salesHistory.filter(s => s.timestamp.startsWith(today));
     const totalToday = todaysSales.reduce((acc, s) => acc + s.total, 0);
 
+    const mesNombre = now.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' });
+    const diaNum = now.getDate();
+
     let reportContent = `FLORIDA CAFÉ - CIERRE DE CAJA\n`;
     reportContent += `Fecha: ${today}\n`;
+    reportContent += `Mes: ${mesNombre}\n`;
+    reportContent += `Día: ${diaNum}\n`;
     reportContent += `------------------------------------------\n`;
 
     todaysSales.forEach((sale, index) => {
@@ -106,8 +124,23 @@ export default function Index() {
 
     reportContent += `\nTOTAL DEL DÍA: ${totalToday.toFixed(2)} MAD\n`;
 
-    descargarTXTParaFichero(`cierre_${today}.txt`, reportContent);
-    alert(`Cierre realizado. Total: ${totalToday.toFixed(2)} MAD`);
+    if (reportFolder) {
+      try {
+        const monthFolder = await reportFolder.getDirectoryHandle(mesNombre, { create: true });
+        const fileHandle = await monthFolder.getFileHandle(`dia_${diaNum}.txt`, { create: true });
+        const writable = await (fileHandle as any).createWritable();
+        await writable.write(reportContent);
+        await writable.close();
+        alert(`Cierre guardado en: ${mesNombre}/dia_${diaNum}.txt ✅`);
+      } catch (err) {
+        console.error("Error al guardar en carpeta:", err);
+        descargarTXTParaFichero(`cierre_${today}.txt`, reportContent);
+        alert("Error al guardar en carpeta. Se ha descargado el archivo normalmente.");
+      }
+    } else {
+      descargarTXTParaFichero(`cierre_${today}.txt`, reportContent);
+      alert(`Cierre realizado y descargado. Total: ${totalToday.toFixed(2)} MAD\n(Configura una carpeta para guardado automático)`);
+    }
   };
 
   const descargarReporteMensual = () => {
@@ -259,6 +292,10 @@ export default function Index() {
           </div>
         </div>
         <div className="flex gap-2">
+          <button onClick={seleccionarCarpeta} className={`${reportFolder ? 'bg-emerald-600' : 'bg-orange-600'} hover:opacity-90 px-4 py-2 rounded-xl font-black text-xs shadow-lg transition-all active:scale-95 uppercase tracking-tighter flex items-center gap-2`}>
+            {reportFolder ? '📁 CARPETA OK' : '📁 CONFIG. CARPETA'}
+          </button>
+          <button onClick={realizarCierre} className="bg-emerald-600 hover:bg-emerald-500 px-4 py-2 rounded-xl font-black text-xs shadow-lg transition-all active:scale-95 uppercase tracking-tighter">GUARDAR CIERRE DÍA</button>
           <button onClick={() => printReport('monthly')} className="bg-indigo-600 hover:bg-indigo-500 px-4 py-2 rounded-xl font-black text-xs shadow-lg transition-all active:scale-95 uppercase tracking-tighter">INFORME PDF MES</button>
           <button onClick={() => printReport('daily')} className="bg-red-600 hover:bg-red-500 px-4 py-2 rounded-xl font-black text-xs shadow-lg transition-all active:scale-95 uppercase tracking-tighter">CIERRE PDF DÍA</button>
         </div>
