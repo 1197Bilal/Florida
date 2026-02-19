@@ -119,10 +119,11 @@ export default function Index() {
   const realizarCierre = async () => {
     const now = new Date();
     const today = now.toISOString().split('T')[0];
-    const todaysSales = salesHistory.filter(s => s.timestamp.startsWith(today));
-    const totalToday = todaysSales.reduce((acc, s) => acc + s.total, 0);
+    const todaysSales = salesHistory.filter((s: Sale) => s.timestamp.startsWith(today));
+    const totalToday = todaysSales.reduce((acc: number, s: Sale) => acc + s.total, 0);
 
-    const mesNombre = now.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' });
+    const añoStr = now.getFullYear().toString();
+    const mesNombre = now.toLocaleDateString('es-ES', { month: 'long' });
     const diaNum = now.getDate();
 
     let reportContent = `FLORIDA CAFÉ - CIERRE DE CAJA\n`;
@@ -145,13 +146,14 @@ export default function Index() {
 
     if (reportFolder) {
       try {
-        const monthFolder = await reportFolder.getDirectoryHandle(mesNombre, { create: true });
+        const yearFolder = await reportFolder.getDirectoryHandle(añoStr, { create: true });
+        const monthFolder = await yearFolder.getDirectoryHandle(mesNombre, { create: true });
         const fileHandle = await monthFolder.getFileHandle(`dia_${diaNum}.txt`, { create: true });
         const writable = await (fileHandle as any).createWritable();
         await writable.write(reportContent);
         await writable.close();
-        alert(`Cierre guardado en: ${mesNombre}/dia_${diaNum}.txt ✅`);
-      } catch (err) {
+        alert(`Cierre guardado en: ${añoStr}/${mesNombre}/dia_${diaNum}.txt ✅`);
+      } catch (err: any) {
         console.error("Error al guardar en carpeta:", err);
         descargarTXTParaFichero(`cierre_${today}.txt`, reportContent);
         alert("Error al guardar en carpeta. Se ha descargado el archivo normalmente.");
@@ -314,9 +316,9 @@ export default function Index() {
           <button onClick={seleccionarCarpeta} className={`${reportFolder ? 'bg-emerald-600' : 'bg-orange-600'} hover:opacity-90 px-4 py-2 rounded-xl font-black text-xs shadow-lg transition-all active:scale-95 uppercase tracking-tighter flex items-center gap-2`}>
             {reportFolder ? '📁 CARPETA OK' : '📁 CONFIG. CARPETA'}
           </button>
-          <button onClick={realizarCierre} className="bg-emerald-600 hover:bg-emerald-500 px-4 py-2 rounded-xl font-black text-xs shadow-lg transition-all active:scale-95 uppercase tracking-tighter">GUARDAR CIERRE DÍA</button>
-          <button onClick={() => printReport('monthly')} className="bg-indigo-600 hover:bg-indigo-500 px-4 py-2 rounded-xl font-black text-xs shadow-lg transition-all active:scale-95 uppercase tracking-tighter">INFORME PDF MES</button>
-          <button onClick={() => printReport('daily')} className="bg-red-600 hover:bg-red-500 px-4 py-2 rounded-xl font-black text-xs shadow-lg transition-all active:scale-95 uppercase tracking-tighter">CIERRE PDF DÍA</button>
+          <button onClick={realizarCierre} className="bg-red-600 hover:bg-red-500 px-4 py-2 rounded-xl font-black text-xs shadow-lg transition-all active:scale-95 uppercase tracking-tighter border-b-4 border-red-800">CIERRE DÍA (GUARDAR)</button>
+          <button onClick={() => printReport('daily')} className="bg-slate-700 hover:bg-slate-600 px-4 py-2 rounded-xl font-black text-xs shadow-lg transition-all active:scale-95 uppercase tracking-tighter border-b-4 border-slate-900">IMPRIMIR TICKET DÍA</button>
+          <button onClick={() => printReport('monthly')} className="bg-indigo-600 hover:bg-indigo-500 px-4 py-2 rounded-xl font-black text-xs shadow-lg transition-all active:scale-95 uppercase tracking-tighter border-b-4 border-indigo-800">INFORME MES (PDF)</button>
         </div>
       </header>
 
