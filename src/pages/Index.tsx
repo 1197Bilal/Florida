@@ -18,8 +18,8 @@ export default function Index() {
   const [businessInfo, setBusinessInfo] = useState({
     name: "FLORIDA CAFÉ",
     nif: "B12345678",
-    address: "Avenida Ejemplo, 12, Planta Baja",
-    city: "Tánger, Marruecos",
+    address: "Florida Café - Tánger",
+    city: "Marruecos",
     manager: "Bilal"
   });
   const [archiveReportData, setArchiveReportData] = useState<any>(null);
@@ -298,84 +298,76 @@ export default function Index() {
                 </div>
               ) : (
                 <div className="space-y-6">
-                  {/* PROFESSIONAL ACCOUNTING DOCUMENT - This is what goes to PDF */}
-                  <div ref={reportRef} className="bg-white p-12 rounded-lg shadow-inner border border-slate-300 mx-auto w-[210mm] min-h-[297mm] text-slate-800 font-serif">
-                    {/* Official Header */}
-                    <div className="flex justify-between items-start border-b-4 border-slate-900 pb-8 mb-10">
+                  {/* SIMPLIFIED INVOICE DOCUMENT */}
+                  <div ref={reportRef} className="bg-white p-12 rounded-lg shadow-inner border border-slate-300 mx-auto w-[210mm] min-h-[140mm] text-slate-800 font-sans">
+                    {/* Simple Header */}
+                    <div className="flex justify-between items-center border-b-2 border-slate-900 pb-6 mb-8">
                       <div>
-                        <h1 className="text-4xl font-serif font-black tracking-tight mb-2 uppercase">{businessInfo.name}</h1>
-                        <div className="text-[12px] space-y-1 font-bold">
-                          <p>NIF/CIF: {businessInfo.nif}</p>
-                          <p>{businessInfo.address}</p>
-                          <p>{businessInfo.city}</p>
-                        </div>
+                        <h1 className="text-3xl font-black tracking-tight mb-1 uppercase">Florida Café 🌴</h1>
+                        <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest leading-tight">Ticket de Cierre Diario</p>
+                        <p className="text-[10px] font-bold text-slate-500">{businessInfo.address}</p>
                       </div>
-                      <div className="text-right flex flex-col items-end">
-                        <div className="bg-slate-900 text-white px-6 py-2 rounded-sm font-black text-sm uppercase mb-4">CERTIFICADO OFICIAL</div>
-                        <p className="text-[10px] uppercase font-black text-slate-400">Fecha de Emisión</p>
-                        <p className="font-serif font-black text-xl italic underline decoration-slate-300 border-b border-slate-200">{selectedDate}</p>
+                      <div className="text-right">
+                        <p className="text-sm font-black uppercase text-slate-400">Fecha del Cierre</p>
+                        <p className="text-xl font-black">{selectedDate}</p>
+                        <p className="text-[10px] text-slate-400 italic">Generado: {new Date().toLocaleTimeString()}</p>
                       </div>
                     </div>
 
-                    <div className="mb-12">
-                      <h2 className="text-2xl font-serif font-black border-b-[3px] border-slate-200 pb-2 mb-6 uppercase">I. RESUMEN FINANCIERO DEL DÍA</h2>
-                      <div className="grid grid-cols-3 gap-0 border border-slate-900">
-                        <div className="p-6 border-r border-slate-900">
-                          <p className="text-[10px] font-black uppercase mb-1">Operaciones</p>
-                          <p className="text-3xl font-serif font-black">{archiveReportData?.sales_count || 0}</p>
-                        </div>
-                        <div className="p-6 border-r border-slate-900 bg-slate-50">
-                          <p className="text-[10px] font-black uppercase mb-1">Base Imponible (Est.)</p>
-                          <p className="text-2xl font-serif font-black">{(archiveReportData?.total_amount / 1.1)?.toFixed(2) || "0.00"} <span className="text-xs">MAD</span></p>
-                        </div>
-                        <div className="p-6 bg-slate-100">
-                          <p className="text-[10px] font-black uppercase mb-1 text-slate-600">Total Recaudado</p>
-                          <p className="text-3xl font-serif font-black text-slate-900">{archiveReportData?.total_amount?.toFixed(2) || "0.00"} <span className="text-xs">MAD</span></p>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="mb-12">
-                      <h2 className="text-2xl font-serif font-black border-b-[3px] border-slate-200 pb-2 mb-6 uppercase">II. DESGLOSE DE ACTIVIDAD</h2>
+                    <div className="mb-10">
                       <table className="w-full text-left border-collapse">
                         <thead>
-                          <tr className="bg-slate-900 text-white text-[10px] font-black uppercase tracking-widest">
-                            <th className="p-3">Detalle Cronológico</th>
-                            <th className="p-3 text-right">Importe Neto</th>
-                            <th className="p-3 text-right">Total MAD</th>
+                          <tr className="border-b-2 border-slate-800 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                            <th className="py-2">Producto / Servicio</th>
+                            <th className="py-2 text-center">Cant.</th>
+                            <th className="py-2 text-right">Precio Unid.</th>
+                            <th className="py-2 text-right">Total</th>
                           </tr>
                         </thead>
-                        <tbody className="text-xs font-serif divide-y-2 divide-slate-100 italic">
-                          {/* Simplified view for the accountant */}
-                          <tr className="font-black text-sm">
-                            <td className="p-4 bg-slate-50 underline">Sumatorio de ventas registradas</td>
-                            <td className="p-4 bg-slate-50 text-right">{(archiveReportData?.total_amount / 1.1)?.toFixed(2)}</td>
-                            <td className="p-4 bg-slate-50 text-right">{archiveReportData?.total_amount?.toFixed(2)}</td>
-                          </tr>
+                        <tbody className="text-sm font-bold divide-y divide-slate-100">
+                          {/* Grouped products calculation */}
+                          {(() => {
+                            const grouped: any = {};
+                            const currentSales = salesAtSelectedDate;
+                            currentSales.forEach((s: Sale) => {
+                              s.items.forEach((item: { name: string, price: number }) => {
+                                if (!grouped[item.name]) {
+                                  grouped[item.name] = { qty: 0, price: item.price, total: 0 };
+                                }
+                                grouped[item.name].qty += 1;
+                                grouped[item.name].total += item.price;
+                              });
+                            });
+
+                            return Object.entries(grouped).sort().map(([name, data]: [string, any]) => (
+                              <tr key={name} className="hover:bg-slate-50 transition-colors">
+                                <td className="py-3 uppercase text-slate-700">{name}</td>
+                                <td className="py-3 text-center text-indigo-600">x{data.qty}</td>
+                                <td className="py-3 text-right text-slate-400">{data.price.toFixed(2)}</td>
+                                <td className="py-3 text-right font-black">{data.total.toFixed(2)} <span className="text-[10px]">MAD</span></td>
+                              </tr>
+                            ));
+                          })()}
                         </tbody>
                       </table>
                     </div>
 
-                    <div className="bg-slate-50 p-6 rounded-lg border border-slate-200 border-dashed">
-                      <p className="text-[10px] font-black uppercase text-slate-400 mb-4">Registro Completo del Sistema</p>
-                      <pre className="font-mono text-[9px] leading-tight text-slate-500 italic">
-                        {archiveReportData?.report_text}
-                      </pre>
+                    {/* Simple Totals */}
+                    <div className="mt-8 pt-6 border-t-2 border-slate-900 flex justify-between items-end">
+                      <div className="text-[10px] font-black uppercase text-slate-400">
+                        <p>Total Operaciones: {archiveReportData?.sales_count || salesAtSelectedDate.length}</p>
+                        <p>Responsable: {businessInfo.manager}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-[12px] font-black uppercase text-slate-400 mb-1">Total Recaudado</p>
+                        <p className="text-5xl font-black tracking-tighter text-slate-900">
+                          {archiveReportData?.total_amount?.toFixed(2) || totalAtSelectedDate.toFixed(2)} <span className="text-xl">MAD</span>
+                        </p>
+                      </div>
                     </div>
 
-                    {/* Signature Section */}
-                    <div className="mt-20 flex justify-between gap-20">
-                      <div className="flex-1 border-t-2 border-slate-300 pt-4 text-center">
-                        <p className="text-[10px] font-black uppercase">Sello del Establecimiento</p>
-                        <div className="h-24 opacity-5 flex items-center justify-center">
-                          <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" className="w-20" alt="seal" />
-                        </div>
-                      </div>
-                      <div className="flex-1 border-t-2 border-slate-300 pt-4 text-center">
-                        <p className="text-[10px] font-black uppercase text-slate-400 mb-10 text-right">Firma del Responsable: {businessInfo.manager}</p>
-                        <p className="font-serif italic border-b border-slate-200 pb-4 text-slate-300 text-left">Fdo: _________________________</p>
-                        <p className="text-[8px] text-slate-400 mt-2 text-right">Firmado electrónicamente por sistema Florida POS</p>
-                      </div>
+                    <div className="mt-12 text-center border-t border-dashed border-slate-200 pt-6">
+                      <p className="text-[10px] text-slate-300 font-black uppercase tracking-[0.3em]">Gracias por su visita al Florida Café</p>
                     </div>
                   </div>
                 </div>
