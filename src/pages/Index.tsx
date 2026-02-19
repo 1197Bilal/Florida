@@ -132,10 +132,10 @@ export default function Index() {
     reportContent += `Día: ${diaNum}\n`;
     reportContent += `------------------------------------------\n`;
 
-    todaysSales.forEach((sale, index) => {
+    todaysSales.forEach((sale: Sale, index: number) => {
       const time = new Date(sale.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
       reportContent += `Venta #${index + 1} - ${time}\n`;
-      sale.items.forEach(item => {
+      sale.items.forEach((item: { name: string, price: number }) => {
         reportContent += `  - ${item.name}: ${item.price.toFixed(2)} MAD\n`;
       });
       reportContent += `  TOTAL: ${sale.total.toFixed(2)} MAD\n`;
@@ -239,14 +239,14 @@ export default function Index() {
                   </tr>
                 </thead>
                 <tbody className="text-sm">
-                  {salesAtSelectedDate.map((s, idx) => (
+                  {salesAtSelectedDate.map((s: Sale, idx: number) => (
                     <React.Fragment key={s.id}>
                       <tr className="bg-slate-50 font-bold border-t border-slate-100">
                         <td className="py-2">{new Date(s.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</td>
                         <td>VENTA #{idx + 1}</td>
                         <td className="text-right font-black text-indigo-700">{s.total.toFixed(2)} MAD</td>
                       </tr>
-                      {s.items.map((item, iidx) => (
+                      {s.items.map((item: { name: string, price: number }, iidx: number) => (
                         <tr key={iidx} className="text-slate-500 text-[10px]">
                           <td />
                           <td className="pl-4 pb-1">- {item.name}</td>
