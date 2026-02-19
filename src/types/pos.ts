@@ -15,6 +15,15 @@ export interface Sale {
 
 export interface DailySummary {
   date: string;
-  totalAmount: number;
-  sales: Sale[];
+  total_amount: number;
+  sales_count: number;
+  report_text: string;
+}
+
+export interface Expense {
+  id?: number;
+  date: string;
+  amount: number;
+  description: string;
+  category: string;
 }

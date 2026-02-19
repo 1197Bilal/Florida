@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { PRODUCTS } from "../data/products";
-import { Sale } from "../types/pos";
+import { Sale, Expense } from "../types/pos";
 import { supabase } from "../lib/supabaseClient";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
@@ -25,11 +25,16 @@ export default function Index() {
   const [archiveReportData, setArchiveReportData] = useState<any>(null);
   const [showArchive, setShowArchive] = useState(false);
   const [loadingArchive, setLoadingArchive] = useState(false);
+  const [expenses, setExpenses] = useState<Expense[]>([]);
+  const [showExpenses, setShowExpenses] = useState(false);
+  const [loadingExpenses, setLoadingExpenses] = useState(false);
+  const [newExpense, setNewExpense] = useState({ amount: "", description: "" });
   const reportRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     fetchSales();
-  }, []);
+    fetchExpenses();
+  }, [selectedDate]);
 
   const fetchSales = async () => {
     const { data, error } = await supabase
@@ -41,6 +46,45 @@ export default function Index() {
       console.error('Error fetching sales:', error);
     } else if (data) {
       setSalesHistory(data);
+    }
+  };
+
+  const fetchExpenses = async () => {
+    setLoadingExpenses(true);
+    const { data, error } = await supabase
+      .from('expenses')
+      .select('*')
+      .order('date', { ascending: false });
+
+    if (error) {
+      console.error('Error fetching expenses:', error);
+    } else if (data) {
+      setExpenses(data);
+    }
+    setLoadingExpenses(false);
+  };
+
+  const guardarGasto = async () => {
+    if (!newExpense.amount || !newExpense.description) return;
+
+    const { error } = await supabase
+      .from('expenses')
+      .insert([
+        {
+          date: selectedDate,
+          amount: parseFloat(newExpense.amount),
+          description: newExpense.description,
+          category: 'Compras Tienda'
+        }
+      ]);
+
+    if (error) {
+      console.error('Error guardando gasto:', error);
+      alert("Error al guardar el gasto");
+    } else {
+      setNewExpense({ amount: "", description: "" });
+      fetchExpenses();
+      alert("Compra registrada correctamente ✅");
     }
   };
 
@@ -232,6 +276,43 @@ export default function Index() {
     pdf.save(`cierre_florida_${selectedDate}.pdf`);
   };
 
+  const descargarMensual = async () => {
+    const month = selectedDate.substring(5, 7);
+    const year = selectedDate.substring(0, 4);
+
+    // Filtrar ventas del mes
+    const monthSales = salesHistory.filter(s => s.timestamp.startsWith(`${year}-${month}`));
+    const monthExpenses = expenses.filter(e => e.date.startsWith(`${year}-${month}`));
+
+    const totalVentas = monthSales.reduce((sum, s) => sum + s.total, 0);
+    const totalGastos = monthExpenses.reduce((sum, e) => sum + e.amount, 0);
+    const balance = totalVentas - totalGastos;
+
+    const doc = new jsPDF();
+    doc.setFontSize(22);
+    doc.text(`REPORTE MENSUAL: ${month}/${year}`, 20, 30);
+    doc.setFontSize(14);
+    doc.text(`Florida Café 🌴`, 20, 40);
+
+    doc.line(20, 45, 190, 45);
+
+    doc.text(`TOTAL VENTAS:`, 20, 60);
+    doc.text(`${totalVentas.toFixed(2)} MAD`, 140, 60, { align: 'right' });
+
+    doc.text(`TOTAL COMPRAS:`, 20, 70);
+    doc.text(`${totalGastos.toFixed(2)} MAD`, 140, 70, { align: 'right' });
+
+    doc.line(20, 75, 190, 75);
+    doc.setFontSize(18);
+    doc.text(`BALANCE FINAL:`, 20, 90);
+    doc.text(`${balance.toFixed(2)} MAD`, 140, 90, { align: 'right' });
+
+    doc.setFontSize(10);
+    doc.text(`Generado por Florida POS Cloud System`, 20, 280);
+
+    doc.save(`reporte_mensual_${year}_${month}.pdf`);
+  };
+
   const descargarReporteMensual = () => {
     const now = new Date();
     const month = now.getMonth() + 1;
@@ -398,6 +479,75 @@ export default function Index() {
         </div>
       )}
 
+      {/* EXPENSES MANAGEMENT MODAL */}
+      {showExpenses && (
+        <div className="fixed inset-0 bg-slate-900/90 backdrop-blur-md z-[10000] flex items-center justify-center p-4">
+          <div className="bg-white w-full max-w-xl rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+            <div className="bg-slate-800 p-6 text-white flex justify-between items-center">
+              <div>
+                <h3 className="font-black uppercase tracking-tighter text-xl text-orange-400">Compras de Tienda 🛒</h3>
+                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Gastos y Suministros</p>
+              </div>
+              <button onClick={() => setShowExpenses(false)} className="w-10 h-10 bg-slate-700 hover:bg-slate-600 rounded-xl transition-all font-black flex items-center justify-center">✕</button>
+            </div>
+
+            <div className="p-8 overflow-y-auto flex-1 bg-slate-50 custom-scrollbar">
+              {/* Form to add expense */}
+              <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 mb-8">
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Registrar Nueva Compra/Gasto ({selectedDate})</p>
+                <div className="grid grid-cols-1 gap-4">
+                  <input
+                    type="number"
+                    placeholder="Importe (Ej: 150.00)"
+                    value={newExpense.amount}
+                    onChange={(e) => setNewExpense({ ...newExpense, amount: e.target.value })}
+                    className="w-full bg-slate-50 p-4 rounded-xl border border-slate-200 font-black text-lg focus:ring-2 ring-orange-400 outline-none"
+                  />
+                  <input
+                    type="text"
+                    placeholder="Descripción (Ej: Leche, Café, Azúcar...)"
+                    value={newExpense.description}
+                    onChange={(e) => setNewExpense({ ...newExpense, description: e.target.value })}
+                    className="w-full bg-slate-50 p-4 rounded-xl border border-slate-200 font-bold focus:ring-2 ring-orange-400 outline-none"
+                  />
+                  <button
+                    onClick={guardarGasto}
+                    className="bg-orange-600 text-white py-4 rounded-xl font-black uppercase text-xs tracking-widest hover:bg-orange-500 shadow-lg active:scale-95 transition-all"
+                  >Añadir Gasto a la Nube ☁️</button>
+                </div>
+              </div>
+
+              {/* List of expenses for the period */}
+              <div className="space-y-4">
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-2">Historial Reciente de Compras</p>
+                {loadingExpenses ? (
+                  <div className="animate-pulse flex items-center justify-center p-10">Cargando gastos...</div>
+                ) : expenses.length === 0 ? (
+                  <div className="text-center py-10 text-slate-300 italic font-bold">No hay gastos registrados</div>
+                ) : (
+                  expenses.map(exp => (
+                    <div key={exp.id} className="bg-white p-4 rounded-2xl border border-slate-200 flex justify-between items-center shadow-sm">
+                      <div className="flex items-center gap-4">
+                        <div className="w-10 h-10 bg-orange-100 text-orange-600 rounded-lg flex items-center justify-center font-black">€</div>
+                        <div>
+                          <p className="font-black text-slate-800 uppercase text-xs">{exp.description}</p>
+                          <p className="text-[9px] text-slate-400 font-bold">{exp.date}</p>
+                        </div>
+                      </div>
+                      <p className="font-black text-orange-600 text-lg">-{exp.amount.toFixed(2)} <span className="text-xs">MAD</span></p>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+
+            <div className="p-4 bg-white border-t border-slate-200">
+              <button onClick={() => setShowExpenses(false)} className="w-full bg-slate-100 text-slate-500 py-3 rounded-2xl font-black uppercase text-xs tracking-widest hover:bg-slate-200 transition-all">Cerrar Ventana</button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* PROFESSIONAL PRINT OVERLAY (Hidden on screen) */}
       {reportType && (
         <div className="fixed inset-0 bg-white z-[9999] p-8 print:block hidden text-slate-900 border-8 border-slate-100 h-full overflow-y-auto">
@@ -521,6 +671,9 @@ export default function Index() {
           </button>
         </div>
         <div className="flex gap-2">
+          <button onClick={() => setShowExpenses(true)} className="bg-slate-700 hover:bg-slate-600 px-3 py-2 rounded-xl font-black text-[10px] shadow-lg transition-all active:scale-95 uppercase tracking-tighter border-b-4 border-slate-900 flex items-center gap-2 text-orange-400">
+            🛒 COMPRAS TIENDA
+          </button>
           <button onClick={() => {
             const name = prompt("Nombre de la Empresa:", businessInfo.name);
             const nif = prompt("NIF/CIF:", businessInfo.nif);
@@ -536,7 +689,7 @@ export default function Index() {
           </button>
           <button onClick={realizarCierre} className="bg-red-600 hover:bg-red-500 px-4 py-2 rounded-xl font-black text-xs shadow-lg transition-all active:scale-95 uppercase tracking-tighter border-b-4 border-red-800">CIERRE DÍA (GUARDAR)</button>
           <button onClick={() => printReport('daily')} className="bg-slate-700 hover:bg-slate-600 px-4 py-2 rounded-xl font-black text-xs shadow-lg transition-all active:scale-95 uppercase tracking-tighter border-b-4 border-slate-900">IMPRIMIR TICKET DÍA</button>
-          <button onClick={() => printReport('monthly')} className="bg-indigo-600 hover:bg-indigo-500 px-4 py-2 rounded-xl font-black text-xs shadow-lg transition-all active:scale-95 uppercase tracking-tighter border-b-4 border-indigo-800">INFORME MES (PDF)</button>
+          <button onClick={descargarMensual} className="bg-indigo-600 hover:bg-indigo-500 px-4 py-2 rounded-xl font-black text-xs shadow-lg transition-all active:scale-95 uppercase tracking-tighter border-b-4 border-indigo-800">INFORME MES (PDF)</button>
         </div>
       </header>
 
