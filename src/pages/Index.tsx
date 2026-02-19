@@ -15,6 +15,13 @@ export default function Index() {
   const [manualAmount, setManualAmount] = useState("");
   const [reportType, setReportType] = useState<"daily" | "monthly" | null>(null);
   const [reportFolder, setReportFolder] = useState<FileSystemDirectoryHandle | null>(null);
+  const [businessInfo, setBusinessInfo] = useState({
+    name: "FLORIDA CAFÉ",
+    nif: "B12345678",
+    address: "Avenida Ejemplo, 12, Planta Baja",
+    city: "Tánger, Marruecos",
+    manager: "Bilal"
+  });
   const [archiveReportData, setArchiveReportData] = useState<any>(null);
   const [showArchive, setShowArchive] = useState(false);
   const [loadingArchive, setLoadingArchive] = useState(false);
@@ -291,43 +298,84 @@ export default function Index() {
                 </div>
               ) : (
                 <div className="space-y-6">
-                  {/* PREVIEW CARD - This is what goes to PDF */}
-                  <div ref={reportRef} className="bg-white p-8 rounded-[2rem] shadow-xl border border-slate-200 relative overflow-hidden">
-                    {/* Decorative Elements */}
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-50 rounded-bl-[5rem] -mr-8 -mt-8 -z-10"></div>
-
-                    <div className="flex justify-between items-start mb-10 border-b-2 border-slate-100 pb-6">
+                  {/* PROFESSIONAL ACCOUNTING DOCUMENT - This is what goes to PDF */}
+                  <div ref={reportRef} className="bg-white p-12 rounded-lg shadow-inner border border-slate-300 mx-auto w-[210mm] min-h-[297mm] text-slate-800 font-serif">
+                    {/* Official Header */}
+                    <div className="flex justify-between items-start border-b-4 border-slate-900 pb-8 mb-10">
                       <div>
-                        <h2 className="text-3xl font-black tracking-tighter uppercase italic text-slate-800">Florida Café 🌴</h2>
-                        <p className="text-[10px] uppercase font-black text-slate-400 tracking-widest">Reporte Diario de Ventas</p>
+                        <h1 className="text-4xl font-serif font-black tracking-tight mb-2 uppercase">{businessInfo.name}</h1>
+                        <div className="text-[12px] space-y-1 font-bold">
+                          <p>NIF/CIF: {businessInfo.nif}</p>
+                          <p>{businessInfo.address}</p>
+                          <p>{businessInfo.city}</p>
+                        </div>
                       </div>
-                      <div className="text-right">
-                        <div className="bg-indigo-600 text-white px-4 py-1.5 rounded-full font-black text-[10px] uppercase tracking-widest mb-2 inline-block">Confirmado ✅</div>
-                        <p className="font-black text-slate-800 text-lg uppercase">{selectedDate}</p>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-8 mb-10">
-                      <div className="bg-slate-50 p-6 rounded-3xl border border-slate-100 shadow-sm">
-                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Ventas Realizadas</p>
-                        <p className="text-4xl font-black text-slate-800">{archiveReportData?.sales_count || 0}</p>
-                      </div>
-                      <div className="bg-indigo-50 p-6 rounded-3xl border border-indigo-100 shadow-sm">
-                        <p className="text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-2">Total Recaudado</p>
-                        <p className="text-4xl font-black text-indigo-600">{archiveReportData?.total_amount?.toFixed(2) || "0.00"} <span className="text-sm">MAD</span></p>
+                      <div className="text-right flex flex-col items-end">
+                        <div className="bg-slate-900 text-white px-6 py-2 rounded-sm font-black text-sm uppercase mb-4">CERTIFICADO OFICIAL</div>
+                        <p className="text-[10px] uppercase font-black text-slate-400">Fecha de Emisión</p>
+                        <p className="font-serif font-black text-xl italic underline decoration-slate-300 border-b border-slate-200">{selectedDate}</p>
                       </div>
                     </div>
 
-                    <div className="bg-slate-50 p-6 rounded-3xl border border-slate-100 shadow-inner">
-                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Detalle del Informe</p>
-                      <pre className="font-mono text-xs whitespace-pre-wrap text-slate-600 leading-relaxed bg-white/50 p-4 rounded-xl border border-white">
+                    <div className="mb-12">
+                      <h2 className="text-2xl font-serif font-black border-b-[3px] border-slate-200 pb-2 mb-6 uppercase">I. RESUMEN FINANCIERO DEL DÍA</h2>
+                      <div className="grid grid-cols-3 gap-0 border border-slate-900">
+                        <div className="p-6 border-r border-slate-900">
+                          <p className="text-[10px] font-black uppercase mb-1">Operaciones</p>
+                          <p className="text-3xl font-serif font-black">{archiveReportData?.sales_count || 0}</p>
+                        </div>
+                        <div className="p-6 border-r border-slate-900 bg-slate-50">
+                          <p className="text-[10px] font-black uppercase mb-1">Base Imponible (Est.)</p>
+                          <p className="text-2xl font-serif font-black">{(archiveReportData?.total_amount / 1.1)?.toFixed(2) || "0.00"} <span className="text-xs">MAD</span></p>
+                        </div>
+                        <div className="p-6 bg-slate-100">
+                          <p className="text-[10px] font-black uppercase mb-1 text-slate-600">Total Recaudado</p>
+                          <p className="text-3xl font-serif font-black text-slate-900">{archiveReportData?.total_amount?.toFixed(2) || "0.00"} <span className="text-xs">MAD</span></p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="mb-12">
+                      <h2 className="text-2xl font-serif font-black border-b-[3px] border-slate-200 pb-2 mb-6 uppercase">II. DESGLOSE DE ACTIVIDAD</h2>
+                      <table className="w-full text-left border-collapse">
+                        <thead>
+                          <tr className="bg-slate-900 text-white text-[10px] font-black uppercase tracking-widest">
+                            <th className="p-3">Detalle Cronológico</th>
+                            <th className="p-3 text-right">Importe Neto</th>
+                            <th className="p-3 text-right">Total MAD</th>
+                          </tr>
+                        </thead>
+                        <tbody className="text-xs font-serif divide-y-2 divide-slate-100 italic">
+                          {/* Simplified view for the accountant */}
+                          <tr className="font-black text-sm">
+                            <td className="p-4 bg-slate-50 underline">Sumatorio de ventas registradas</td>
+                            <td className="p-4 bg-slate-50 text-right">{(archiveReportData?.total_amount / 1.1)?.toFixed(2)}</td>
+                            <td className="p-4 bg-slate-50 text-right">{archiveReportData?.total_amount?.toFixed(2)}</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+
+                    <div className="bg-slate-50 p-6 rounded-lg border border-slate-200 border-dashed">
+                      <p className="text-[10px] font-black uppercase text-slate-400 mb-4">Registro Completo del Sistema</p>
+                      <pre className="font-mono text-[9px] leading-tight text-slate-500 italic">
                         {archiveReportData?.report_text}
                       </pre>
                     </div>
 
-                    <div className="mt-10 pt-6 border-t border-dashed border-slate-200 flex justify-between items-center italic">
-                      <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Sistema POS Florida - Nube</span>
-                      <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" className="w-8 opacity-10" alt="seal" />
+                    {/* Signature Section */}
+                    <div className="mt-20 flex justify-between gap-20">
+                      <div className="flex-1 border-t-2 border-slate-300 pt-4 text-center">
+                        <p className="text-[10px] font-black uppercase">Sello del Establecimiento</p>
+                        <div className="h-24 opacity-5 flex items-center justify-center">
+                          <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" className="w-20" alt="seal" />
+                        </div>
+                      </div>
+                      <div className="flex-1 border-t-2 border-slate-300 pt-4 text-center">
+                        <p className="text-[10px] font-black uppercase text-slate-400 mb-10 text-right">Firma del Responsable: {businessInfo.manager}</p>
+                        <p className="font-serif italic border-b border-slate-200 pb-4 text-slate-300 text-left">Fdo: _________________________</p>
+                        <p className="text-[8px] text-slate-400 mt-2 text-right">Firmado electrónicamente por sistema Florida POS</p>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -481,6 +529,16 @@ export default function Index() {
           </button>
         </div>
         <div className="flex gap-2">
+          <button onClick={() => {
+            const name = prompt("Nombre de la Empresa:", businessInfo.name);
+            const nif = prompt("NIF/CIF:", businessInfo.nif);
+            const address = prompt("Dirección:", businessInfo.address);
+            const city = prompt("Ciudad:", businessInfo.city);
+            const manager = prompt("Responsable:", businessInfo.manager);
+            if (name) setBusinessInfo({ name, nif: nif || "", address: address || "", city: city || "", manager: manager || "" });
+          }} className="bg-slate-700 hover:bg-slate-600 px-3 py-2 rounded-xl font-black text-[10px] shadow-lg transition-all active:scale-95 uppercase tracking-tighter border-b-4 border-slate-900 flex items-center gap-2 text-indigo-400">
+            ⚙️ DATOS NEGOCIO
+          </button>
           <button onClick={seleccionarCarpeta} className={`${reportFolder ? 'bg-emerald-600' : 'bg-orange-600'} hover:opacity-90 px-4 py-2 rounded-xl font-black text-xs shadow-lg transition-all active:scale-95 uppercase tracking-tighter flex items-center gap-2`}>
             {reportFolder ? '📁 CARPETA OK' : '📁 CONFIG. CARPETA'}
           </button>
@@ -568,6 +626,6 @@ export default function Index() {
           REALIZAR VENTA
         </button>
       </footer>
-    </div>
+    </div >
   );
 }
