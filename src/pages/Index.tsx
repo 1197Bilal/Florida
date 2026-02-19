@@ -2,6 +2,25 @@ import React, { useState, useEffect } from "react";
 import { PRODUCTS } from "../data/products";
 import { Sale } from "../types/pos";
 
+// Extended types for File System Access API
+interface FileSystemWritableFileStream extends WritableStream {
+  write(data: any): Promise<void>;
+  seek(position: number): Promise<void>;
+  truncate(size: number): Promise<void>;
+}
+
+interface FileSystemFileHandle extends FileSystemHandle {
+  readonly kind: 'file';
+  getFile(): Promise<File>;
+  createWritable(options?: { keepExistingData?: boolean }): Promise<FileSystemWritableFileStream>;
+}
+
+interface FileSystemDirectoryHandle extends FileSystemHandle {
+  readonly kind: 'directory';
+  getDirectoryHandle(name: string, options?: { create?: boolean }): Promise<FileSystemDirectoryHandle>;
+  getFileHandle(name: string, options?: { create?: boolean }): Promise<FileSystemFileHandle>;
+}
+
 export default function Index() {
   const [carrito, setCarrito] = useState<{ name: string, price: number, id: number, time: string }[]>([]);
   const [salesHistory, setSalesHistory] = useState<Sale[]>(() => {
@@ -17,7 +36,7 @@ export default function Index() {
     localStorage.setItem("florida_sales_history", JSON.stringify(salesHistory));
   }, [salesHistory]);
 
-  const totalTicket = carrito.reduce((acc, item) => acc + item.price, 0);
+  const totalTicket = carrito.reduce((acc: number, item) => acc + item.price, 0);
 
   const agregar = (name: string, price: number) => {
     const now = new Date();
@@ -39,7 +58,7 @@ export default function Index() {
   };
 
   const eliminarUno = (id: number) => {
-    setCarrito(carrito.filter(item => item.id !== id));
+    setCarrito(carrito.filter((item: { id: number }) => item.id !== id));
   };
 
   const cobrar = () => {
@@ -49,7 +68,7 @@ export default function Index() {
     const newSale: Sale = {
       id: Date.now(),
       timestamp: now.toISOString(),
-      items: carrito.map(i => ({ name: i.name, price: i.price })),
+      items: carrito.map((i: { name: string, price: number }) => ({ name: i.name, price: i.price })),
       total: totalTicket
     };
 
@@ -66,15 +85,15 @@ export default function Index() {
     }, 100);
   };
 
-  const salesAtSelectedDate = salesHistory.filter(s => s.timestamp.startsWith(selectedDate));
-  const totalAtSelectedDate = salesAtSelectedDate.reduce((acc, s) => acc + s.total, 0);
+  const salesAtSelectedDate = salesHistory.filter((s: Sale) => s.timestamp.startsWith(selectedDate));
+  const totalAtSelectedDate = salesAtSelectedDate.reduce((acc: number, s: Sale) => acc + s.total, 0);
 
   const getMonthlySales = () => {
     const month = selectedDate.substring(0, 7);
-    return salesHistory.filter(s => s.timestamp.startsWith(month));
+    return salesHistory.filter((s: Sale) => s.timestamp.startsWith(month));
   };
 
-  const totalMonthly = getMonthlySales().reduce((acc, s) => acc + s.total, 0);
+  const totalMonthly = getMonthlySales().reduce((acc: number, s: Sale) => acc + s.total, 0);
 
   const descargarTXTParaFichero = (filename: string, text: string) => {
     const element = document.createElement("a");
@@ -149,8 +168,8 @@ export default function Index() {
     const year = now.getFullYear();
     const monthStr = `${year}-${month.toString().padStart(2, '0')}`;
 
-    const monthlySales = salesHistory.filter(s => s.timestamp.startsWith(monthStr));
-    const totalMonth = monthlySales.reduce((acc, s) => acc + s.total, 0);
+    const monthlySales = salesHistory.filter((s: Sale) => s.timestamp.startsWith(monthStr));
+    const totalMonth = monthlySales.reduce((acc: number, s: Sale) => acc + s.total, 0);
 
     let reportContent = `FLORIDA CAFÉ - REPORTE MENSUAL\n`;
     reportContent += `Mes: ${monthStr}\n`;
@@ -158,7 +177,7 @@ export default function Index() {
 
     // Agrupar por día
     const salesByDay: { [key: string]: number } = {};
-    monthlySales.forEach(s => {
+    monthlySales.forEach((s: Sale) => {
       const day = s.timestamp.split('T')[0];
       salesByDay[day] = (salesByDay[day] || 0) + s.total;
     });
@@ -194,12 +213,12 @@ export default function Index() {
               <div className="mb-6 p-4 bg-slate-50 border-2 border-slate-200 rounded-2xl">
                 <h3 className="text-xs font-black uppercase tracking-widest text-slate-400 mb-3 border-b pb-2">Resumen de Productos</h3>
                 <div className="grid grid-cols-2 gap-x-8 gap-y-2">
-                  {Object.entries(salesAtSelectedDate.reduce((acc: any, s) => {
-                    s.items.forEach(item => {
+                  {(Object.entries(salesAtSelectedDate.reduce((acc: { [key: string]: number }, s: Sale) => {
+                    s.items.forEach((item: { name: string }) => {
                       acc[item.name] = (acc[item.name] || 0) + 1;
                     });
                     return acc;
-                  }, {})).sort().map(([name, qty]: [string, any]) => (
+                  }, {} as { [key: string]: number })) as [string, number][]).sort().map(([name, qty]) => (
                     <div key={name} className="flex justify-between text-sm border-b border-slate-100 pb-1">
                       <span className="font-bold text-slate-700">{name}</span>
                       <span className="font-black text-indigo-600">x{qty}</span>
@@ -251,11 +270,11 @@ export default function Index() {
                   </tr>
                 </thead>
                 <tbody className="text-sm">
-                  {Object.entries(getMonthlySales().reduce((acc: any, s) => {
+                  {(Object.entries(getMonthlySales().reduce((acc: { [key: string]: number }, s: Sale) => {
                     const day = s.timestamp.split('T')[0];
                     acc[day] = (acc[day] || 0) + s.total;
                     return acc;
-                  }, {})).sort().map(([day, total]: [string, any]) => (
+                  }, {} as { [key: string]: number })) as [string, number][]).sort().map(([day, total]) => (
                     <tr key={day} className="border-b border-slate-100">
                       <td className="py-2 font-bold border-r pr-4">{day}</td>
                       <td className="text-right font-black">{total.toFixed(2)} MAD</td>
