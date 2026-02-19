@@ -1,7 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { PRODUCTS } from "../data/products";
 import { Sale } from "../types/pos";
 import { supabase } from "../lib/supabaseClient";
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
 
 export default function Index() {
   const [carrito, setCarrito] = useState<{ name: string, price: number, id: number, time: string }[]>([]);
@@ -13,9 +15,10 @@ export default function Index() {
   const [manualAmount, setManualAmount] = useState("");
   const [reportType, setReportType] = useState<"daily" | "monthly" | null>(null);
   const [reportFolder, setReportFolder] = useState<FileSystemDirectoryHandle | null>(null);
-  const [archiveReportText, setArchiveReportText] = useState<string | null>(null);
+  const [archiveReportData, setArchiveReportData] = useState<any>(null);
   const [showArchive, setShowArchive] = useState(false);
   const [loadingArchive, setLoadingArchive] = useState(false);
+  const reportRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     fetchSales();
@@ -189,17 +192,37 @@ export default function Index() {
     setShowArchive(true);
     const { data, error } = await supabase
       .from('daily_summaries')
-      .select('report_text')
+      .select('*')
       .eq('date', selectedDate)
       .single();
 
     if (error) {
-      console.warn("No se encontró reporte para esta fecha o error técnico:", error);
-      setArchiveReportText("No hay ningún reporte guardado para esta fecha en la nube.");
+      console.warn("No se encontró reporte:", error);
+      setArchiveReportData({ error: true, text: "No hay ningún reporte guardado para esta fecha." });
     } else if (data) {
-      setArchiveReportText(data.report_text);
+      setArchiveReportData(data);
     }
     setLoadingArchive(false);
+  };
+
+  const descargarPDF = async () => {
+    if (!reportRef.current) return;
+
+    // Configuración para que quede "guapo"
+    const canvas = await html2canvas(reportRef.current, {
+      scale: 3, // Alta calidad
+      useCORS: true,
+      backgroundColor: "#ffffff"
+    });
+
+    const imgData = canvas.toDataURL('image/png');
+    const pdf = new jsPDF('p', 'mm', 'a4');
+    const imgProps = pdf.getImageProperties(imgData);
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+    const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+
+    pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+    pdf.save(`cierre_florida_${selectedDate}.pdf`);
   };
 
   const descargarReporteMensual = () => {
@@ -234,31 +257,102 @@ export default function Index() {
 
   return (
     <div className="h-screen w-full bg-slate-200 flex flex-col font-sans overflow-hidden text-slate-900">
-      {/* ARCHIVE VIEWER OVERLAY */}
+      {/* ARCHIVE VIEWER OVERLAY - PREMIUM VERSION */}
       {showArchive && (
-        <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-[10000] flex items-center justify-center p-4">
-          <div className="bg-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
-            <div className="bg-slate-800 p-4 text-white flex justify-between items-center">
-              <div>
-                <h3 className="font-black uppercase tracking-tighter text-lg">Archivo de Cierres 📚</h3>
-                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Fecha: {selectedDate}</p>
+        <div className="fixed inset-0 bg-slate-900/90 backdrop-blur-md z-[10000] flex items-center justify-center p-4">
+          <div className="bg-slate-100 w-full max-w-2xl rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col max-h-[95vh] border-4 border-white/20">
+            <div className="bg-gradient-to-r from-slate-800 to-slate-900 p-6 text-white flex justify-between items-center border-b border-slate-700">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-indigo-500 rounded-2xl flex items-center justify-center text-2xl shadow-lg shadow-indigo-500/30">📚</div>
+                <div>
+                  <h3 className="font-black uppercase tracking-tighter text-xl">Archivo de Cierres</h3>
+                  <p className="text-[10px] text-indigo-300 font-bold uppercase tracking-[0.2em]">Florida Café Cloud System</p>
+                </div>
               </div>
-              <button onClick={() => setShowArchive(false)} className="w-10 h-10 bg-slate-700 hover:bg-slate-600 rounded-xl transition-colors font-black">✕</button>
+              <button
+                onClick={() => { setShowArchive(false); setArchiveReportData(null); }}
+                className="w-10 h-10 bg-slate-700 hover:bg-red-500/20 hover:text-red-400 rounded-xl transition-all font-black flex items-center justify-center text-lg active:scale-90"
+              >✕</button>
             </div>
-            <div className="p-6 overflow-y-auto flex-1 bg-slate-50">
+
+            <div className="p-8 overflow-y-auto flex-1 custom-scrollbar">
               {loadingArchive ? (
-                <div className="flex flex-col items-center justify-center py-20 gap-4">
-                  <div className="w-12 h-12 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
-                  <p className="font-black text-slate-400 uppercase text-xs tracking-widest">Buscando en la nube...</p>
+                <div className="flex flex-col items-center justify-center py-20 gap-6">
+                  <div className="w-16 h-16 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin shadow-xl"></div>
+                  <div className="text-center">
+                    <p className="font-black text-slate-800 uppercase text-sm tracking-widest mb-1">Consultando Nube</p>
+                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tighter italic">Buscando documentos del {selectedDate}...</p>
+                  </div>
+                </div>
+              ) : archiveReportData?.error ? (
+                <div className="flex flex-col items-center justify-center py-20 text-center gap-4">
+                  <div className="text-6xl opacity-30">🔍</div>
+                  <p className="font-black text-slate-400 uppercase tracking-widest text-sm">{archiveReportData.text}</p>
                 </div>
               ) : (
-                <pre className="font-mono text-sm whitespace-pre-wrap bg-white p-4 rounded-xl border-2 border-slate-200 shadow-inner">
-                  {archiveReportText}
-                </pre>
+                <div className="space-y-6">
+                  {/* PREVIEW CARD - This is what goes to PDF */}
+                  <div ref={reportRef} className="bg-white p-8 rounded-[2rem] shadow-xl border border-slate-200 relative overflow-hidden">
+                    {/* Decorative Elements */}
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-50 rounded-bl-[5rem] -mr-8 -mt-8 -z-10"></div>
+
+                    <div className="flex justify-between items-start mb-10 border-b-2 border-slate-100 pb-6">
+                      <div>
+                        <h2 className="text-3xl font-black tracking-tighter uppercase italic text-slate-800">Florida Café 🌴</h2>
+                        <p className="text-[10px] uppercase font-black text-slate-400 tracking-widest">Reporte Diario de Ventas</p>
+                      </div>
+                      <div className="text-right">
+                        <div className="bg-indigo-600 text-white px-4 py-1.5 rounded-full font-black text-[10px] uppercase tracking-widest mb-2 inline-block">Confirmado ✅</div>
+                        <p className="font-black text-slate-800 text-lg uppercase">{selectedDate}</p>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-8 mb-10">
+                      <div className="bg-slate-50 p-6 rounded-3xl border border-slate-100 shadow-sm">
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Ventas Realizadas</p>
+                        <p className="text-4xl font-black text-slate-800">{archiveReportData?.sales_count || 0}</p>
+                      </div>
+                      <div className="bg-indigo-50 p-6 rounded-3xl border border-indigo-100 shadow-sm">
+                        <p className="text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-2">Total Recaudado</p>
+                        <p className="text-4xl font-black text-indigo-600">{archiveReportData?.total_amount?.toFixed(2) || "0.00"} <span className="text-sm">MAD</span></p>
+                      </div>
+                    </div>
+
+                    <div className="bg-slate-50 p-6 rounded-3xl border border-slate-100 shadow-inner">
+                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Detalle del Informe</p>
+                      <pre className="font-mono text-xs whitespace-pre-wrap text-slate-600 leading-relaxed bg-white/50 p-4 rounded-xl border border-white">
+                        {archiveReportData?.report_text}
+                      </pre>
+                    </div>
+
+                    <div className="mt-10 pt-6 border-t border-dashed border-slate-200 flex justify-between items-center italic">
+                      <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Sistema POS Florida - Nube</span>
+                      <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" className="w-8 opacity-10" alt="seal" />
+                    </div>
+                  </div>
+                </div>
               )}
             </div>
-            <div className="p-4 bg-slate-100 border-t flex justify-center">
-              <button onClick={() => setShowArchive(false)} className="bg-slate-800 text-white px-8 py-3 rounded-2xl font-black uppercase text-xs tracking-widest hover:bg-slate-700 transition-all active:scale-95 shadow-lg">Cerrar Visor</button>
+
+            <div className="p-6 bg-white border-t border-slate-200 flex gap-4">
+              <button
+                onClick={() => setShowArchive(false)}
+                className="flex-1 bg-slate-100 text-slate-500 py-4 rounded-2xl font-black uppercase text-xs tracking-widest hover:bg-slate-200 transition-all active:scale-95"
+              >Cerrar Visor</button>
+              {archiveReportData && !archiveReportData.error && (
+                <>
+                  <button
+                    onClick={() => window.print()}
+                    className="flex-1 bg-slate-800 text-white py-4 rounded-2xl font-black uppercase text-xs tracking-widest hover:bg-slate-700 transition-all active:scale-95 shadow-lg border-b-4 border-slate-950"
+                  >Imprimir Copia</button>
+                  <button
+                    onClick={descargarPDF}
+                    className="flex-1 bg-indigo-600 text-white py-4 rounded-2xl font-black uppercase text-xs tracking-widest hover:bg-indigo-500 transition-all active:scale-95 shadow-xl border-b-4 border-indigo-800 flex items-center justify-center gap-2"
+                  >
+                    <span>📥</span> DESCARGAR PDF
+                  </button>
+                </>
+              )}
             </div>
           </div>
         </div>
