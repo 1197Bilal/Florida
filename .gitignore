@@ -75,8 +75,8 @@ out/
 .nuxt/
 
 # gatsby
-.cache/
-public/
+# 78: .cache/
+# 79: public/ (Removed from ignore to allow assets)
 
 # vuepress
 .vuepress/dist
