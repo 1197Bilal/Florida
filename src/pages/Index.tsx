@@ -647,7 +647,7 @@ export default function Index() {
       <header className="bg-slate-900/95 backdrop-blur-md text-white p-4 flex justify-between items-center shadow-2xl border-b border-slate-800 print:hidden sticky top-0 z-50">
         <div className="flex items-center gap-6">
           <div className="flex flex-col">
-            <h1 className="font-black italic text-2xl uppercase tracking-tighter leading-none mb-1 shadow-indigo-500/20 drop-shadow-lg">FLORIDA CAFÉ 🌴</h1>
+            <h1 className="font-black italic text-2xl uppercase tracking-tighter leading-none mb-1 shadow-indigo-500/20 drop-shadow-lg">FLORIDA CAFÉ</h1>
             <p className="text-[9px] text-slate-500 font-bold uppercase tracking-[0.2em] ml-1">Premium POS System</p>
           </div>
 
@@ -797,7 +797,7 @@ export default function Index() {
                 <button key={n} onClick={() => pressNum(n.toString())} className="bg-white py-3.5 rounded-2xl shadow-sm text-lg font-black text-slate-700 active:scale-95 transition-all hover:bg-slate-50 border border-slate-100 hover:border-slate-200">{n}</button>
               ))}
               <button onClick={() => setManualAmount("")} className="bg-slate-50 py-3.5 rounded-2xl shadow-sm text-lg font-black text-rose-500 active:scale-95 hover:bg-rose-50 transition-all border border-slate-200 font-mono">C</button>
-              <button onClick={agregarManual} className="col-span-4 bg-slate-900 text-white py-4 rounded-2xl font-black mt-2 shadow-lg hover:bg-slate-800 active:scale-95 transition-all text-[11px] uppercase tracking-widest border-b-4 border-slate-950">AÑADIR IMPORTE LIBRE</button>
+              <button onClick={agregarManual} className="col-span-4 bg-emerald-600 text-white py-4 rounded-2xl font-black mt-2 shadow-lg hover:bg-emerald-500 active:scale-95 transition-all text-[11px] uppercase tracking-widest border-b-4 border-emerald-800">AÑADIR IMPORTE LIBRE</button>
             </div>
           </div>
 
@@ -824,15 +824,15 @@ export default function Index() {
               {/* Image with overlay price */}
               <div className="flex-1 w-full overflow-hidden bg-slate-50 relative">
                 <img src={p.image} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000 grayscale-[20%] group-hover:grayscale-0" alt={p.name} />
-                <div className="absolute top-4 right-4 bg-slate-900/90 backdrop-blur-md px-4 py-1.5 rounded-2xl shadow-xl border border-white/10">
-                  <div className="text-white font-black text-sm tracking-tighter">{p.price.toFixed(2)} <span className="text-[10px] opacity-60">MAD</span></div>
-                </div>
                 <div className="absolute inset-0 bg-gradient-to-tr from-indigo-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
               </div>
 
-              {/* Minimal Info */}
+              {/* Minimal Info with Price */}
               <div className="p-5 bg-white">
-                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mb-1">{p.name.split(' ')[0]}</div>
+                <div className="flex justify-between items-end mb-1">
+                  <div className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">{p.name.split(' ')[0]}</div>
+                  <div className="text-emerald-600 font-black text-xs tracking-tighter">{p.price.toFixed(2)} <span className="text-[8px] opacity-60">MAD</span></div>
+                </div>
                 <div className="text-base font-black text-slate-800 uppercase tracking-tighter leading-none truncate">{p.name}</div>
               </div>
 
@@ -844,9 +844,9 @@ export default function Index() {
       </div>
 
       <footer className="bg-white px-10 py-5 shadow-[0_-15px_60px_rgba(0,0,0,0.08)] print:hidden relative z-10 flex justify-center border-t border-slate-100">
-        <button onClick={cobrar} className="w-full max-w-3xl bg-slate-900 hover:bg-indigo-600 text-white font-black py-5 rounded-[2rem] text-2xl shadow-2xl shadow-indigo-500/20 transition-all duration-300 active:scale-95 uppercase tracking-[0.2em] flex items-center justify-center gap-4 group">
-          <span className="text-xs opacity-40 font-bold tracking-widest group-hover:opacity-100 transition-opacity">Pulse para</span>
-          FINALIZAR VENTA 🪁
+        <button onClick={cobrar} className="w-full max-w-3xl bg-emerald-600 hover:bg-emerald-500 text-white font-black py-5 rounded-[2rem] text-2xl shadow-2xl shadow-emerald-500/20 transition-all duration-300 active:scale-95 uppercase tracking-[0.2em] flex items-center justify-center gap-4 group">
+          <span className="text-xs opacity-60 font-bold tracking-widest group-hover:opacity-100 transition-opacity">Pulse para</span>
+          FINALIZAR VENTA ✅
         </button>
       </footer>
     </div >
