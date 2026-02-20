@@ -631,7 +631,7 @@ export default function Index() {
         <div className="fixed inset-0 bg-white z-[9999] p-8 print:block hidden text-slate-900 border-8 border-slate-100 h-full overflow-y-auto">
           <div className="flex justify-between items-start border-b-4 border-slate-800 pb-4 mb-6">
             <div>
-              <h1 className="text-4xl font-black italic mb-1 uppercase tracking-tighter">FLORIDA CAFÉ 🌴</h1>
+              <h1 className="text-4xl font-black italic mb-1 uppercase tracking-tighter">FLORIDA CAFÉ</h1>
               <p className="text-slate-500 font-bold uppercase tracking-widest text-[10px]">Informe oficial de ventas</p>
             </div>
             <div className="text-right">
@@ -639,7 +639,92 @@ export default function Index() {
               <p className="text-slate-500 font-bold">{reportType === 'daily' ? selectedDate : selectedDate.substring(0, 7)}</p>
             </div>
           </div>
-          {/* ... rest of print overlay ... */}
+
+          {reportType === 'daily' ? (
+            <div>
+              <div className="mb-6 p-4 bg-slate-50 border-2 border-slate-200 rounded-2xl">
+                <h3 className="text-xs font-black uppercase tracking-widest text-slate-400 mb-3 border-b pb-2">Resumen de Productos</h3>
+                <div className="grid grid-cols-2 gap-x-8 gap-y-2">
+                  {(Object.entries(salesAtSelectedDate.reduce((acc: { [key: string]: number }, s: Sale) => {
+                    s.items.forEach((item: { name: string }) => {
+                      acc[item.name] = (acc[item.name] || 0) + 1;
+                    });
+                    return acc;
+                  }, {} as { [key: string]: number })) as [string, number][]).sort().map(([name, qty]) => (
+                    <div key={name} className="flex justify-between text-sm border-b border-slate-100 pb-1">
+                      <span className="font-bold text-slate-700">{name}</span>
+                      <span className="font-black text-emerald-600">x{qty}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <h3 className="text-xs font-black uppercase tracking-widest text-slate-400 mb-2 mt-8">Detalle Cronológico</h3>
+              <table className="w-full text-left">
+                <thead className="border-b-2 border-slate-300 uppercase text-[10px] font-black text-slate-400">
+                  <tr>
+                    <th className="py-2">Hora</th>
+                    <th>Concepto</th>
+                    <th className="text-right">Importe</th>
+                  </tr>
+                </thead>
+                <tbody className="text-sm">
+                  {salesAtSelectedDate.map((s: Sale, idx: number) => (
+                    <React.Fragment key={s.id}>
+                      <tr className="bg-slate-50 font-bold border-t border-slate-100">
+                        <td className="py-2">{new Date(s.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</td>
+                        <td>VENTA #{idx + 1}</td>
+                        <td className="text-right font-black text-emerald-700">{s.total.toFixed(2)} MAD</td>
+                      </tr>
+                      {s.items.map((item: { name: string, price: number }, iidx: number) => (
+                        <tr key={iidx} className="text-slate-500 text-[10px]">
+                          <td />
+                          <td className="pl-4 pb-1">- {item.name}</td>
+                          <td className="text-right">{item.price.toFixed(2)} MAD</td>
+                        </tr>
+                      ))}
+                    </React.Fragment>
+                  ))}
+                </tbody>
+              </table>
+              <div className="mt-8 pt-4 border-t-4 border-slate-800 flex justify-between items-center">
+                <span className="text-2xl font-black uppercase tracking-tighter">Total del día:</span>
+                <span className="text-4xl font-black">{totalAtSelectedDate.toFixed(2)} MAD</span>
+              </div>
+            </div>
+          ) : (
+            <div>
+              <table className="w-full text-left border-collapse">
+                <thead className="border-b-2 border-slate-300 uppercase text-[10px] font-black text-slate-400">
+                  <tr>
+                    <th className="py-2 border-r pr-4">Fecha</th>
+                    <th className="text-right">Total Día</th>
+                  </tr>
+                </thead>
+                <tbody className="text-sm">
+                  {(Object.entries(getMonthlySales().reduce((acc: { [key: string]: number }, s: Sale) => {
+                    const day = new Date(s.timestamp).toISOString().split('T')[0];
+                    acc[day] = (acc[day] || 0) + s.total;
+                    return acc;
+                  }, {} as { [key: string]: number })) as [string, number][]).sort().map(([day, total]) => (
+                    <tr key={day} className="border-b border-slate-100">
+                      <td className="py-2 font-bold border-r pr-4">{day}</td>
+                      <td className="text-right font-black">{total.toFixed(2)} MAD</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <div className="mt-8 pt-4 border-t-4 border-slate-800 flex justify-between items-center">
+                <span className="text-2xl font-black uppercase tracking-tighter">Total Mes:</span>
+                <span className="text-4xl font-black">{totalMonthly.toFixed(2)} MAD</span>
+              </div>
+            </div>
+          )}
+
+          <div className="mt-12 text-[10px] text-slate-400 border-t pt-4 flex justify-between italic">
+            <span>Florida Café POS - Software de gestión</span>
+            <span>Generado el: {new Date().toLocaleString()}</span>
+          </div>
         </div>
       )}
 
