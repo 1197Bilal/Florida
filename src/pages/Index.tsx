@@ -747,19 +747,24 @@ export default function Index() {
 
         <div className="w-2/3 p-6 bg-slate-100 overflow-y-auto grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 content-start pb-24">
           {PRODUCTS.map((p) => (
-            <button key={p.name} onClick={() => agregar(p.name, p.price)} className={`bg-white rounded-3xl shadow-sm hover:shadow-xl border-2 border-transparent hover:border-indigo-500 active:scale-95 transition-all group relative overflow-hidden flex flex-col h-full bg-gradient-to-b from-white to-slate-50`}>
-              <div className="aspect-square w-full overflow-hidden bg-slate-200">
-                <img src={p.image} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 aspect-square" alt={p.name} />
-              </div>
-              <div className="p-4 flex flex-col flex-1 text-left">
-                <div className="text-[10px] font-black uppercase text-indigo-500 tracking-widest mb-1 opacity-80">{p.name.split(' ')[0]}</div>
-                <div className="text-sm font-black text-slate-800 uppercase leading-tight mb-2 flex-grow">{p.name}</div>
-                <div className="flex justify-between items-end">
-                  <div className="text-slate-400 text-[10px] font-bold">Importe:</div>
-                  <div className="text-indigo-600 font-black text-xl tracking-tighter">{p.price.toFixed(2)} <span className="text-[10px] ml-0.5">MAD</span></div>
+            <button key={p.name} onClick={() => agregar(p.name, p.price)} className={`bg-white rounded-[2.5rem] shadow-sm hover:shadow-2xl border-4 border-white hover:border-indigo-500 active:scale-95 transition-all group relative overflow-hidden flex flex-col h-[280px] group`}>
+              {/* LARGE IMAGE AREA */}
+              <div className="flex-1 w-full overflow-hidden bg-slate-100 relative">
+                <img src={p.image} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" alt={p.name} />
+                {/* Subtle Price Tag Overlay */}
+                <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-md px-3 py-1.5 rounded-2xl shadow-lg border border-white/50 animate-in fade-in zoom-in duration-500">
+                  <div className="text-indigo-700 font-black text-sm tracking-tight">{p.price.toFixed(2)} <span className="text-[8px] opacity-70">MAD</span></div>
                 </div>
               </div>
-              <div className={`h-1.5 w-full ${p.color.replace('border-', 'bg-')}`}></div>
+
+              {/* INFO AREA (Smaller, focused on Name) */}
+              <div className="p-5 pt-4 bg-white">
+                <div className="text-[9px] font-black uppercase text-indigo-400 tracking-[0.2em] mb-1 group-hover:text-indigo-500 transition-colors uppercase leading-none">{p.name.split(' ')[0]}</div>
+                <div className="text-base font-black text-slate-800 uppercase leading-none tracking-tighter truncate">{p.name}</div>
+              </div>
+
+              {/* Decorative Accent Line */}
+              <div className={`h-2 w-full ${p.color.replace('border-', 'bg-')} opacity-60`}></div>
             </button>
           ))}
         </div>
