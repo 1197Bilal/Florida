@@ -50,6 +50,7 @@ export default function Index() {
       console.error('Error fetching sales:', error);
     } else if (data) {
       setSalesHistory(data);
+      localStorage.setItem("florida_sales_history", JSON.stringify(data));
     }
   };
 
@@ -160,12 +161,19 @@ export default function Index() {
     }, 100);
   };
 
-  const salesAtSelectedDate = salesHistory.filter((s: Sale) => s.timestamp.startsWith(selectedDate));
+  const salesAtSelectedDate = salesHistory.filter((s: Sale) => {
+    // Comparación robusta de fechas (ignorando horas y zonas horarias de string)
+    const saleDate = new Date(s.timestamp).toISOString().split('T')[0];
+    return saleDate === selectedDate;
+  });
   const totalAtSelectedDate = salesAtSelectedDate.reduce((acc: number, s: Sale) => acc + s.total, 0);
 
   const getMonthlySales = () => {
     const month = selectedDate.substring(0, 7);
-    return salesHistory.filter((s: Sale) => s.timestamp.startsWith(month));
+    return salesHistory.filter((s: Sale) => {
+      const saleMonth = new Date(s.timestamp).toISOString().substring(0, 7);
+      return saleMonth === month;
+    });
   };
 
   const totalMonthly = getMonthlySales().reduce((acc: number, s: Sale) => acc + s.total, 0);
@@ -783,11 +791,16 @@ export default function Index() {
             </div>
           </div>
 
-          <div className="bg-slate-900 p-4 text-white">
+          <div className="bg-slate-900 p-4 text-white border-t border-slate-700">
             <div className="flex justify-between items-center">
-              <span className="text-sm font-bold text-slate-400 uppercase tracking-widest">Total</span>
-              <span className="text-5xl font-black text-emerald-400">{totalTicket.toFixed(2)} <span className="text-xl">MAD</span></span>
+              <span className="text-sm font-bold text-slate-400 uppercase tracking-widest">{activeTab === 'carrito' ? 'Total Ticket' : 'Total del Día'}</span>
+              <span className="text-4xl font-black text-emerald-400">
+                {(activeTab === 'carrito' ? totalTicket : totalAtSelectedDate).toFixed(2)} <span className="text-lg">MAD</span>
+              </span>
             </div>
+            {activeTab === 'ventas' && !isToday && (
+              <p className="text-[10px] text-indigo-400 font-bold uppercase mt-2 text-right">Consultando histórico del {selectedDate}</p>
+            )}
           </div>
         </div>
 
