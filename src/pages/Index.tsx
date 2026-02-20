@@ -88,7 +88,7 @@ export default function Index() {
     } else {
       setNewExpense({ amount: "", description: "" });
       fetchExpenses();
-      alert("Compra registrada correctamente ✅");
+      alert("Compra registrada correctamente");
     }
   };
 
@@ -149,7 +149,7 @@ export default function Index() {
 
     setSalesHistory([...salesHistory, newSale]);
     setCarrito([]);
-    alert("Venta realizada y guardada en la nube ✅");
+    alert("Venta realizada y guardada en la nube");
   };
 
   const printReport = (type: "daily" | "monthly") => {
@@ -191,7 +191,7 @@ export default function Index() {
     try {
       const handle = await (window as any).showDirectoryPicker();
       setReportFolder(handle);
-      alert("Carpeta de reportes configurada correctamente 📂");
+      alert("Carpeta de reportes configurada correctamente");
     } catch (err) {
       console.error("Error al seleccionar carpeta:", err);
       alert("No se pudo seleccionar la carpeta.");
@@ -229,7 +229,7 @@ export default function Index() {
     if (dbError) {
       console.error('Error al guardar resumen en Supabase:', dbError);
     } else {
-      alert(`Cierre del ${selectedDate} guardado en la nube ☁️✅`);
+      alert(`Cierre del ${selectedDate} guardado en la nube`);
     }
 
     // 2. Guardar en carpeta local (Opcional, si está configurada)
@@ -242,7 +242,7 @@ export default function Index() {
         const writable = await (fileHandle as any).createWritable();
         await writable.write(reportContent);
         await writable.close();
-        alert(`También guardado en copia local: ${añoStr}/${mesNombre}/dia_${diaStr}.txt ✅`);
+        alert(`También guardado en copia local: ${añoStr}/${mesNombre}/dia_${diaStr}.txt`);
       } catch (err: any) {
         console.error("Error al guardar copia local:", err);
       }
@@ -314,7 +314,7 @@ export default function Index() {
     doc.text(`REPORTE MENSUAL: ${month}/${year}`, 20, 25);
     doc.setFontSize(12);
     doc.setTextColor(100);
-    doc.text(`Florida Café 🌴 - Tanger, Marruecos`, 20, 32);
+    doc.text(`Florida Café - Tanger, Marruecos`, 20, 32);
 
     doc.setDrawColor(0);
     doc.setLineWidth(0.5);
@@ -429,7 +429,7 @@ export default function Index() {
           <div className="bg-slate-100 w-full max-w-2xl rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col max-h-[95vh] border-4 border-white/20">
             <div className="bg-gradient-to-r from-slate-800 to-slate-900 p-6 text-white flex justify-between items-center border-b border-slate-700">
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-indigo-500 rounded-2xl flex items-center justify-center text-2xl shadow-lg shadow-indigo-500/30">📚</div>
+                <div className="w-12 h-12 bg-indigo-500 rounded-2xl flex items-center justify-center text-xs font-black text-white shadow-lg shadow-indigo-500/30">DOC</div>
                 <div>
                   <h3 className="font-black uppercase tracking-tighter text-xl">Archivo de Cierres</h3>
                   <p className="text-[10px] text-indigo-300 font-bold uppercase tracking-[0.2em]">Florida Café Cloud System</p>
@@ -451,9 +451,9 @@ export default function Index() {
                   </div>
                 </div>
               ) : archiveReportData?.error ? (
-                <div className="flex flex-col items-center justify-center py-20 text-center gap-4">
-                  <div className="text-6xl opacity-30">🔍</div>
-                  <p className="font-black text-slate-400 uppercase tracking-widest text-sm">{archiveReportData.text}</p>
+                <div className="flex flex-col items-center justify-center py-20 text-center gap-4 text-slate-400">
+                  <div className="text-sm font-black border-2 border-slate-200 p-4 rounded-full w-14 h-14 flex items-center justify-center">!</div>
+                  <p className="font-black uppercase tracking-widest text-sm">{archiveReportData.text}</p>
                 </div>
               ) : (
                 <div className="space-y-6">
@@ -462,7 +462,7 @@ export default function Index() {
                     {/* Simple Header */}
                     <div className="flex justify-between items-center border-b-2 border-slate-900 pb-6 mb-8">
                       <div>
-                        <h1 className="text-3xl font-black tracking-tight mb-1 uppercase">Florida Café 🌴</h1>
+                        <h1 className="text-3xl font-black tracking-tight mb-1 uppercase">Florida Café</h1>
                         <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest leading-tight">Ticket de Cierre Diario</p>
                         <p className="text-[10px] font-bold text-slate-500">{businessInfo.address}</p>
                       </div>
@@ -548,7 +548,7 @@ export default function Index() {
                     onClick={descargarPDF}
                     className="flex-1 bg-indigo-600 text-white py-4 rounded-2xl font-black uppercase text-xs tracking-widest hover:bg-indigo-500 transition-all active:scale-95 shadow-xl border-b-4 border-indigo-800 flex items-center justify-center gap-2"
                   >
-                    <span>📥</span> DESCARGAR PDF
+                    DESCARGAR PDF
                   </button>
                 </>
               )}
@@ -563,7 +563,7 @@ export default function Index() {
           <div className="bg-white w-full max-w-xl rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
             <div className="bg-slate-800 p-6 text-white flex justify-between items-center">
               <div>
-                <h3 className="font-black uppercase tracking-tighter text-xl text-orange-400">Compras de Tienda 🛒</h3>
+                <h3 className="font-black uppercase tracking-tighter text-xl text-orange-400">Compras de Tienda</h3>
                 <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Gastos y Suministros</p>
               </div>
               <button onClick={() => setShowExpenses(false)} className="w-10 h-10 bg-slate-700 hover:bg-slate-600 rounded-xl transition-all font-black flex items-center justify-center">✕</button>
@@ -590,8 +590,8 @@ export default function Index() {
                   />
                   <button
                     onClick={guardarGasto}
-                    className="bg-orange-600 text-white py-4 rounded-xl font-black uppercase text-xs tracking-widest hover:bg-orange-500 shadow-lg active:scale-95 transition-all"
-                  >Añadir Gasto a la Nube ☁️</button>
+                    className="bg-orange-600 text-white py-4 rounded-xl font-black uppercase text-xs tracking-widest hover:bg-orange-500 shadow-lg active:scale-95 transition-all outline-none"
+                  >Añadir Gasto a la Nube</button>
                 </div>
               </div>
 
@@ -750,16 +750,16 @@ export default function Index() {
 
           <div className="flex gap-2">
             <button
-              onClick={() => { fetchSales(); fetchExpenses(); alert("Sincronizando con la nube... ☁️"); }}
+              onClick={() => { fetchSales(); fetchExpenses(); alert("Sincronizando con la nube..."); }}
               className="px-4 py-2 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all active:scale-95 flex items-center gap-2 bg-slate-800 hover:bg-indigo-600 text-slate-300 hover:text-white border border-slate-700 hover:border-indigo-400"
             >
-              🔄 NUBE {salesHistory.length > 0 && <span className="opacity-50 text-[8px]">({salesHistory.length})</span>}
+              SYNC {salesHistory.length > 0 && <span className="opacity-50 text-[8px]">({salesHistory.length})</span>}
             </button>
             <button
               onClick={verCierreGuardado}
               className="bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 px-4 py-2 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all active:scale-95 flex items-center gap-2"
             >
-              📚 ARCHIVO
+              ARCHIVO
             </button>
             {dbError && (
               <div className="bg-red-500/20 text-red-400 border border-red-500/50 px-4 py-2 rounded-xl font-black text-[10px] animate-pulse">
@@ -771,15 +771,15 @@ export default function Index() {
 
         <div className="flex gap-3 items-center">
           <div className="bg-slate-800/50 rounded-2xl p-1 flex border border-slate-800">
-            <button onClick={() => setShowExpenses(true)} className="px-4 py-2.5 rounded-xl font-black text-[10px] tracking-tighter transition-all active:scale-95 uppercase flex items-center gap-2 text-orange-400 hover:bg-orange-500/10">
-              🛒 GASTOS
+            <button onClick={() => setShowExpenses(true)} className="px-4 py-2.5 rounded-xl font-black text-[10px] tracking-widest transition-all active:scale-95 uppercase flex items-center gap-2 text-orange-400 hover:bg-orange-500/10">
+              GASTOS
             </button>
             <button onClick={() => {
               const name = prompt("Nombre:", businessInfo.name);
               const manager = prompt("Responsable:", businessInfo.manager);
               if (name) setBusinessInfo({ ...businessInfo, name, manager: manager || "" });
-            }} className="px-4 py-2.5 rounded-xl font-black text-[10px] tracking-tighter transition-all active:scale-95 uppercase flex items-center gap-2 text-indigo-400 hover:bg-indigo-500/10">
-              ⚙️ DATOS
+            }} className="px-4 py-2.5 rounded-xl font-black text-[10px] tracking-widest transition-all active:scale-95 uppercase flex items-center gap-2 text-indigo-400 hover:bg-indigo-500/10">
+              DATOS
             </button>
           </div>
 
@@ -790,11 +790,11 @@ export default function Index() {
           </button>
 
           <div className="flex gap-1">
-            <button onClick={() => printReport('daily')} className="bg-slate-100 hover:bg-white text-slate-900 px-4 py-2.5 rounded-2xl font-black text-[10px] shadow-lg transition-all active:scale-95 uppercase tracking-tighter flex items-center gap-2">
-              🖨️ TICKET DÍA
+            <button onClick={() => printReport('daily')} className="bg-slate-100 hover:bg-white text-slate-900 px-4 py-2.5 rounded-2xl font-black text-[10px] shadow-lg transition-all active:scale-95 uppercase tracking-widest flex items-center gap-2">
+              TICKET DÍA
             </button>
-            <button onClick={descargarMensual} className="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2.5 rounded-2xl font-black text-[10px] shadow-lg shadow-indigo-900/20 transition-all active:scale-95 uppercase tracking-tighter border-b-4 border-indigo-800">
-              📥 INFORME MES
+            <button onClick={descargarMensual} className="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2.5 rounded-2xl font-black text-[10px] shadow-lg shadow-indigo-900/20 transition-all active:scale-95 uppercase tracking-widest border-b-4 border-indigo-800">
+              INFORME MES
             </button>
           </div>
         </div>
@@ -821,8 +821,10 @@ export default function Index() {
             {activeTab === "carrito" ? (
               carrito.length === 0 ? (
                 <div className="h-full flex flex-col items-center justify-center text-slate-300 p-10 text-center gap-4 group">
-                  <div className="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center text-4xl group-hover:scale-110 transition-transform duration-500">☕</div>
-                  <p className="font-bold text-xs uppercase tracking-widest leading-relaxed">Carrito vacío<br />Selecciona un producto</p>
+                  <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center border border-slate-200 group-hover:scale-110 transition-transform duration-500">
+                    <div className="w-6 h-6 border-2 border-slate-300 rounded-sm"></div>
+                  </div>
+                  <p className="font-bold text-[10px] uppercase tracking-[0.2em] leading-relaxed opacity-60">Ticket vacío<br />Selecciona productos</p>
                 </div>
               ) : (
                 carrito.map((item) => (
@@ -842,8 +844,13 @@ export default function Index() {
               /* TAB VENTAS REALIZADAS */
               salesAtSelectedDate.length === 0 ? (
                 <div className="h-full flex flex-col items-center justify-center text-slate-300 p-10 text-center gap-4">
-                  <div className="text-5xl">📄</div>
-                  <p className="font-bold text-xs uppercase tracking-widest leading-relaxed">No hay ventas<br />registradas este día</p>
+                  <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center border border-slate-200">
+                    <div className="w-6 h-8 border-2 border-slate-300 rounded-sm relative">
+                      <div className="absolute top-2 left-1 right-1 h-0.5 bg-slate-300"></div>
+                      <div className="absolute top-4 left-1 right-1 h-0.5 bg-slate-300"></div>
+                    </div>
+                  </div>
+                  <p className="font-bold text-[10px] uppercase tracking-[0.2em] leading-relaxed opacity-60">Historial vacío<br />Sin ventas registradas</p>
                 </div>
               ) : (
                 <div className="divide-y divide-slate-200">
@@ -912,13 +919,13 @@ export default function Index() {
                 <div className="absolute inset-0 bg-gradient-to-tr from-indigo-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
               </div>
 
-              {/* Minimal Info with Price */}
-              <div className="p-5 bg-white">
-                <div className="flex justify-between items-end mb-1">
-                  <div className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">{p.name.split(' ')[0]}</div>
-                  <div className="text-emerald-600 font-black text-xs tracking-tighter">{p.price.toFixed(2)} <span className="text-[8px] opacity-60">MAD</span></div>
+              {/* Optimized Distribution */}
+              <div className="p-6 bg-white flex flex-col justify-center flex-shrink-0 border-t border-slate-50">
+                <div className="flex justify-between items-baseline">
+                  <div className="text-[8px] font-black text-slate-400 uppercase tracking-[0.4em] truncate pr-4">{p.name.split(' ')[0]}</div>
+                  <div className="text-emerald-700 font-black text-sm tracking-tighter whitespace-nowrap">{p.price.toFixed(2)} MAD</div>
                 </div>
-                <div className="text-base font-black text-slate-800 uppercase tracking-tighter leading-none truncate">{p.name}</div>
+                <div className="text-[17px] font-black text-slate-900 uppercase tracking-tighter leading-tight mt-1.5 group-hover:text-indigo-600 transition-all duration-300 line-clamp-1">{p.name}</div>
               </div>
 
               {/* Dynamic Accent Line */}
@@ -931,7 +938,7 @@ export default function Index() {
       <footer className="bg-white px-10 py-5 shadow-[0_-15px_60px_rgba(0,0,0,0.08)] print:hidden relative z-10 flex justify-center border-t border-slate-100">
         <button onClick={cobrar} className="w-full max-w-3xl bg-emerald-600 hover:bg-emerald-500 text-white font-black py-5 rounded-[2rem] text-2xl shadow-2xl shadow-emerald-500/20 transition-all duration-300 active:scale-95 uppercase tracking-[0.2em] flex items-center justify-center gap-4 group">
           <span className="text-xs opacity-60 font-bold tracking-widest group-hover:opacity-100 transition-opacity">Pulse para</span>
-          FINALIZAR VENTA ✅
+          FINALIZAR VENTA
         </button>
       </footer>
     </div >
