@@ -745,26 +745,25 @@ export default function Index() {
           </div>
         </div>
 
-        <div className="w-2/3 p-6 bg-slate-100 overflow-y-auto grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 content-start pb-24">
+        <div className="w-2/3 p-4 bg-slate-100 overflow-y-auto grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 content-start pb-24">
           {PRODUCTS.map((p) => (
-            <button key={p.name} onClick={() => agregar(p.name, p.price)} className={`bg-white rounded-[2.5rem] shadow-sm hover:shadow-2xl border-4 border-white hover:border-indigo-500 active:scale-95 transition-all group relative overflow-hidden flex flex-col h-[280px] group`}>
+            <button key={p.name} onClick={() => agregar(p.name, p.price)} className={`bg-white rounded-[1.5rem] shadow-sm hover:shadow-2xl border-2 border-white hover:border-indigo-500 active:scale-95 transition-all group relative overflow-hidden flex flex-col h-[180px]`}>
               {/* LARGE IMAGE AREA */}
               <div className="flex-1 w-full overflow-hidden bg-slate-100 relative">
                 <img src={p.image} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" alt={p.name} />
                 {/* Subtle Price Tag Overlay */}
-                <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-md px-3 py-1.5 rounded-2xl shadow-lg border border-white/50 animate-in fade-in zoom-in duration-500">
-                  <div className="text-indigo-700 font-black text-sm tracking-tight">{p.price.toFixed(2)} <span className="text-[8px] opacity-70">MAD</span></div>
+                <div className="absolute top-2 right-2 bg-white/90 backdrop-blur-md px-2 py-0.5 rounded-xl shadow-lg border border-white/50">
+                  <div className="text-indigo-700 font-black text-[10px] tracking-tight">{p.price.toFixed(2)} <span className="text-[7px] opacity-70">MAD</span></div>
                 </div>
               </div>
 
-              {/* INFO AREA (Smaller, focused on Name) */}
-              <div className="p-5 pt-4 bg-white">
-                <div className="text-[9px] font-black uppercase text-indigo-400 tracking-[0.2em] mb-1 group-hover:text-indigo-500 transition-colors uppercase leading-none">{p.name.split(' ')[0]}</div>
-                <div className="text-base font-black text-slate-800 uppercase leading-none tracking-tighter truncate">{p.name}</div>
+              {/* INFO AREA */}
+              <div className="p-3 pt-2 bg-white">
+                <div className="text-xs font-black text-slate-800 uppercase leading-none tracking-tighter truncate">{p.name}</div>
               </div>
 
               {/* Decorative Accent Line */}
-              <div className={`h-2 w-full ${p.color.replace('border-', 'bg-')} opacity-60`}></div>
+              <div className={`h-1 w-full ${p.color.replace('border-', 'bg-')} opacity-60`}></div>
             </button>
           ))}
         </div>
