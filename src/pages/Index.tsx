@@ -7,11 +7,9 @@ import html2canvas from "html2canvas";
 
 export default function Index() {
   const [carrito, setCarrito] = useState<{ name: string, price: number, id: number, time: string }[]>([]);
-  const [salesHistory, setSalesHistory] = useState<Sale[]>(() => {
-    const saved = localStorage.getItem("florida_sales_history");
-    return saved ? JSON.parse(saved) : [];
-  });
+  const [salesHistory, setSalesHistory] = useState<Sale[]>([]);
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+  const [dbError, setDbError] = useState<string | null>(null);
   const isToday = selectedDate === new Date().toISOString().split('T')[0];
   const [manualAmount, setManualAmount] = useState("");
   const [reportType, setReportType] = useState<"daily" | "monthly" | null>(null);
@@ -41,16 +39,17 @@ export default function Index() {
   }, [selectedDate]);
 
   const fetchSales = async () => {
+    setDbError(null);
     const { data, error } = await supabase
       .from('sales')
       .select('*')
-      .order('timestamp', { ascending: true });
+      .order('timestamp', { ascending: false }); // Más recientes primero
 
     if (error) {
       console.error('Error fetching sales:', error);
+      setDbError(error.message);
     } else if (data) {
       setSalesHistory(data);
-      localStorage.setItem("florida_sales_history", JSON.stringify(data));
     }
   };
 
@@ -676,11 +675,22 @@ export default function Index() {
             />
           </div>
           <button
+            onClick={() => { fetchSales(); fetchExpenses(); alert("Sincronizando con la nube... ☁️"); }}
+            className="bg-slate-700 hover:bg-slate-600 px-3 py-1.5 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all active:scale-95 flex items-center gap-2 text-indigo-300 border border-indigo-500/20"
+          >
+            🔄 RECARGAR {salesHistory.length > 0 && `(${salesHistory.length})`}
+          </button>
+          <button
             onClick={verCierreGuardado}
             className="bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-400 border border-indigo-500/30 px-3 py-1.5 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all active:scale-95 flex items-center gap-2"
           >
             📚 VER CIERRE GUARDADO
           </button>
+          {dbError && (
+            <div className="bg-red-500/20 text-red-400 border border-red-500/50 px-3 py-1.5 rounded-xl font-black text-[10px] animate-pulse">
+              ⚠️ ERROR DB: {dbError}
+            </div>
+          )}
         </div>
         <div className="flex gap-2">
           <button onClick={() => setShowExpenses(true)} className="bg-slate-700 hover:bg-slate-600 px-3 py-2 rounded-xl font-black text-[10px] shadow-lg transition-all active:scale-95 uppercase tracking-tighter border-b-4 border-slate-900 flex items-center gap-2 text-orange-400">
