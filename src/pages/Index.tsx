@@ -745,25 +745,26 @@ export default function Index() {
           </div>
         </div>
 
-        <div className="w-2/3 p-3 bg-slate-100 overflow-y-auto grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 gap-2 content-start pb-24">
+        <div className="w-2/3 p-6 bg-slate-100 overflow-y-auto grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 content-start pb-24">
           {PRODUCTS.map((p) => (
-            <button key={p.name} onClick={() => agregar(p.name, p.price)} className={`bg-white rounded-2xl shadow-sm hover:shadow-2xl border-2 border-white hover:border-indigo-500 active:scale-95 transition-all group relative overflow-hidden flex flex-col h-[160px]`}>
+            <button key={p.name} onClick={() => agregar(p.name, p.price)} className={`bg-white rounded-3xl shadow-md hover:shadow-2xl border-4 border-white hover:border-indigo-500 active:scale-95 transition-all group relative overflow-hidden flex flex-col h-[220px]`}>
               {/* IMAGE AREA */}
               <div className="flex-1 w-full overflow-hidden bg-slate-100 relative">
                 <img src={p.image} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" alt={p.name} />
-                {/* Subtle Price Tag Overlay */}
-                <div className="absolute top-1.5 right-1.5 bg-white/95 backdrop-blur-md px-2 py-0.5 rounded-xl shadow-lg border border-white/50">
-                  <div className="text-indigo-700 font-black text-[11px] tracking-tight">{p.price.toFixed(0)} <span className="text-[7px] opacity-70">MAD</span></div>
+                {/* Clear Price Tag Overlay */}
+                <div className="absolute top-3 right-3 bg-indigo-600/90 backdrop-blur-md px-3 py-1 rounded-2xl shadow-xl">
+                  <div className="text-white font-black text-sm tracking-tight">{p.price.toFixed(2)} <span className="text-[9px] opacity-70">MAD</span></div>
                 </div>
               </div>
 
-              {/* INFO AREA */}
-              <div className="p-2.5 pt-1.5 bg-white">
-                <div className="text-[11px] font-black text-slate-800 uppercase leading-none tracking-tighter truncate">{p.name}</div>
+              {/* INFO AREA (Professional POS Label) */}
+              <div className="p-4 bg-white border-t border-slate-50">
+                <div className="text-xs font-black text-slate-400 uppercase tracking-widest mb-0.5 line-clamp-1">{p.name.split(' ')[0]}</div>
+                <div className="text-sm font-black text-slate-800 uppercase leading-none tracking-tight truncate">{p.name}</div>
               </div>
 
-              {/* Decorative Accent Line */}
-              <div className={`h-1 w-full ${p.color.replace('border-', 'bg-')} opacity-60`}></div>
+              {/* Robust Decorative Accent Line */}
+              <div className={`h-2 w-full ${p.color.replace('border-', 'bg-')} opacity-80`}></div>
             </button>
           ))}
         </div>
