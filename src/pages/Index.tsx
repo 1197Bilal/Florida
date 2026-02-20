@@ -290,38 +290,105 @@ export default function Index() {
   const descargarMensual = async () => {
     const month = selectedDate.substring(5, 7);
     const year = selectedDate.substring(0, 4);
+    const monthStr = `${year}-${month}`;
 
-    // Filtrar ventas del mes
-    const monthSales = salesHistory.filter(s => s.timestamp.startsWith(`${year}-${month}`));
-    const monthExpenses = expenses.filter(e => e.date.startsWith(`${year}-${month}`));
+    // Filtrar ventas y gastos del mes
+    const monthSales = salesHistory.filter(s => new Date(s.timestamp).toISOString().startsWith(monthStr));
+    const monthExpenses = expenses.filter(e => e.date.startsWith(monthStr));
 
     const totalVentas = monthSales.reduce((sum, s) => sum + s.total, 0);
     const totalGastos = monthExpenses.reduce((sum, e) => sum + e.amount, 0);
     const balance = totalVentas - totalGastos;
 
+    // Agrupar ventas por día
+    const dailyTotals: { [key: string]: number } = {};
+    monthSales.forEach(s => {
+      const day = new Date(s.timestamp).toISOString().split('T')[0];
+      dailyTotals[day] = (dailyTotals[day] || 0) + s.total;
+    });
+
     const doc = new jsPDF();
+
+    // Header
     doc.setFontSize(22);
-    doc.text(`REPORTE MENSUAL: ${month}/${year}`, 20, 30);
+    doc.text(`REPORTE MENSUAL: ${month}/${year}`, 20, 25);
+    doc.setFontSize(12);
+    doc.setTextColor(100);
+    doc.text(`Florida Café 🌴 - Tanger, Marruecos`, 20, 32);
+
+    doc.setDrawColor(0);
+    doc.setLineWidth(0.5);
+    doc.line(20, 35, 190, 35);
+
+    // Listado día a día
     doc.setFontSize(14);
-    doc.text(`Florida Café 🌴`, 20, 40);
-
-    doc.line(20, 45, 190, 45);
-
-    doc.text(`TOTAL VENTAS:`, 20, 60);
-    doc.text(`${totalVentas.toFixed(2)} MAD`, 140, 60, { align: 'right' });
-
-    doc.text(`TOTAL COMPRAS:`, 20, 70);
-    doc.text(`${totalGastos.toFixed(2)} MAD`, 140, 70, { align: 'right' });
-
-    doc.line(20, 75, 190, 75);
-    doc.setFontSize(18);
-    doc.text(`BALANCE FINAL:`, 20, 90);
-    doc.text(`${balance.toFixed(2)} MAD`, 140, 90, { align: 'right' });
+    doc.setTextColor(0);
+    doc.text(`DESGLOSE DIARIO DE VENTAS`, 20, 45);
 
     doc.setFontSize(10);
-    doc.text(`Generado por Florida POS Cloud System`, 20, 280);
+    let y = 55;
 
-    doc.save(`reporte_mensual_${year}_${month}.pdf`);
+    const sortedDays = Object.keys(dailyTotals).sort();
+
+    if (sortedDays.length === 0) {
+      doc.text("No hay ventas registradas este mes.", 20, y);
+      y += 10;
+    } else {
+      // Header Tabla
+      doc.setFont('helvetica', 'bold');
+      doc.text("Fecha", 25, y);
+      doc.text("Total Día", 140, y, { align: 'right' });
+      doc.setFont('helvetica', 'normal');
+      y += 5;
+      doc.line(20, y, 190, y);
+      y += 8;
+
+      sortedDays.forEach(day => {
+        if (y > 250) { // Salto de página
+          doc.addPage();
+          y = 20;
+        }
+        doc.text(day, 25, y);
+        doc.text(`${dailyTotals[day].toFixed(2)} MAD`, 140, y, { align: 'right' });
+        y += 7;
+      });
+    }
+
+    y += 10;
+    doc.setLineWidth(0.5);
+    doc.line(20, y, 190, y);
+    y += 15;
+
+    // Resumen Final
+    doc.setFontSize(16);
+    doc.setFont('helvetica', 'bold');
+    doc.text(`RESUMEN DEL MES`, 20, y);
+    y += 12;
+
+    doc.setFontSize(12);
+    doc.text(`VENTAS TOTALES:`, 20, y);
+    doc.text(`${totalVentas.toFixed(2)} MAD`, 140, y, { align: 'right' });
+    y += 8;
+
+    doc.text(`COMPRAS TOTALES:`, 20, y);
+    doc.text(`${totalGastos.toFixed(2)} MAD`, 140, y, { align: 'right' });
+    y += 8;
+
+    doc.setLineWidth(1);
+    doc.line(20, y, 190, y);
+    y += 12;
+
+    doc.setFontSize(18);
+    doc.setTextColor(79, 70, 229); // Un lila corporativo
+    doc.text(`BALANCE FINAL:`, 20, y);
+    doc.text(`${balance.toFixed(2)} MAD`, 140, y, { align: 'right' });
+
+    // Footer
+    doc.setFontSize(9);
+    doc.setTextColor(150);
+    doc.text(`Generado por Florida POS Cloud System el ${new Date().toLocaleString()}`, 20, 285);
+
+    doc.save(`reporte_mensual_florida_${year}_${month}.pdf`);
   };
 
   const descargarReporteMensual = () => {
