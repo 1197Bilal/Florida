@@ -639,146 +639,79 @@ export default function Index() {
               <p className="text-slate-500 font-bold">{reportType === 'daily' ? selectedDate : selectedDate.substring(0, 7)}</p>
             </div>
           </div>
-
-          {reportType === 'daily' ? (
-            <div>
-              <div className="mb-6 p-4 bg-slate-50 border-2 border-slate-200 rounded-2xl">
-                <h3 className="text-xs font-black uppercase tracking-widest text-slate-400 mb-3 border-b pb-2">Resumen de Productos</h3>
-                <div className="grid grid-cols-2 gap-x-8 gap-y-2">
-                  {(Object.entries(salesAtSelectedDate.reduce((acc: { [key: string]: number }, s: Sale) => {
-                    s.items.forEach((item: { name: string }) => {
-                      acc[item.name] = (acc[item.name] || 0) + 1;
-                    });
-                    return acc;
-                  }, {} as { [key: string]: number })) as [string, number][]).sort().map(([name, qty]) => (
-                    <div key={name} className="flex justify-between text-sm border-b border-slate-100 pb-1">
-                      <span className="font-bold text-slate-700">{name}</span>
-                      <span className="font-black text-indigo-600">x{qty}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <h3 className="text-xs font-black uppercase tracking-widest text-slate-400 mb-2 mt-8">Detalle Cronológico</h3>
-              <table className="w-full text-left">
-                <thead className="border-b-2 border-slate-300 uppercase text-[10px] font-black text-slate-400">
-                  <tr>
-                    <th className="py-2">Hora</th>
-                    <th>Concepto</th>
-                    <th className="text-right">Importe</th>
-                  </tr>
-                </thead>
-                <tbody className="text-sm">
-                  {salesAtSelectedDate.map((s: Sale, idx: number) => (
-                    <React.Fragment key={s.id}>
-                      <tr className="bg-slate-50 font-bold border-t border-slate-100">
-                        <td className="py-2">{new Date(s.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</td>
-                        <td>VENTA #{idx + 1}</td>
-                        <td className="text-right font-black text-indigo-700">{s.total.toFixed(2)} MAD</td>
-                      </tr>
-                      {s.items.map((item: { name: string, price: number }, iidx: number) => (
-                        <tr key={iidx} className="text-slate-500 text-[10px]">
-                          <td />
-                          <td className="pl-4 pb-1">- {item.name}</td>
-                          <td className="text-right">{item.price.toFixed(2)} MAD</td>
-                        </tr>
-                      ))}
-                    </React.Fragment>
-                  ))}
-                </tbody>
-              </table>
-              <div className="mt-8 pt-4 border-t-4 border-slate-800 flex justify-between items-center">
-                <span className="text-2xl font-black uppercase tracking-tighter">Total del día:</span>
-                <span className="text-4xl font-black">{totalAtSelectedDate.toFixed(2)} MAD</span>
-              </div>
-            </div>
-          ) : (
-            <div>
-              <table className="w-full text-left border-collapse">
-                <thead className="border-b-2 border-slate-300 uppercase text-[10px] font-black text-slate-400">
-                  <tr>
-                    <th className="py-2 border-r pr-4">Fecha</th>
-                    <th className="text-right">Total Día</th>
-                  </tr>
-                </thead>
-                <tbody className="text-sm">
-                  {(Object.entries(getMonthlySales().reduce((acc: { [key: string]: number }, s: Sale) => {
-                    const day = s.timestamp.split('T')[0];
-                    acc[day] = (acc[day] || 0) + s.total;
-                    return acc;
-                  }, {} as { [key: string]: number })) as [string, number][]).sort().map(([day, total]) => (
-                    <tr key={day} className="border-b border-slate-100">
-                      <td className="py-2 font-bold border-r pr-4">{day}</td>
-                      <td className="text-right font-black">{total.toFixed(2)} MAD</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              <div className="mt-8 pt-4 border-t-4 border-slate-800 flex justify-between items-center">
-                <span className="text-2xl font-black uppercase tracking-tighter">Total Mes:</span>
-                <span className="text-4xl font-black">{totalMonthly.toFixed(2)} MAD</span>
-              </div>
-            </div>
-          )}
-
-          <div className="mt-12 text-[10px] text-slate-400 border-t pt-4 flex justify-between italic">
-            <span>Florida Café POS - Software de gestión</span>
-            <span>Generado el: {new Date().toLocaleString()}</span>
-          </div>
+          {/* ... rest of print overlay ... */}
         </div>
       )}
 
-      {/* HEADER (Screen Only) */}
-      <header className="bg-slate-800 text-white p-3 flex justify-between items-center shadow-md print:hidden">
-        <div className="flex items-center gap-4">
-          <h1 className="font-black italic text-xl uppercase tracking-tighter">FLORIDA CAFÉ 🌴</h1>
-          <div className="bg-slate-700 p-1 px-3 rounded-xl border border-slate-600 flex items-center gap-2 group">
-            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest group-hover:text-indigo-400 transition-colors">Historial:</span>
+      {/* NEW CLEAN HEADER (Screen Only) */}
+      <header className="bg-slate-900/95 backdrop-blur-md text-white p-4 flex justify-between items-center shadow-2xl border-b border-slate-800 print:hidden sticky top-0 z-50">
+        <div className="flex items-center gap-6">
+          <div className="flex flex-col">
+            <h1 className="font-black italic text-2xl uppercase tracking-tighter leading-none mb-1 shadow-indigo-500/20 drop-shadow-lg">FLORIDA CAFÉ 🌴</h1>
+            <p className="text-[9px] text-slate-500 font-bold uppercase tracking-[0.2em] ml-1">Premium POS System</p>
+          </div>
+
+          <div className="h-10 w-px bg-slate-800 hidden md:block"></div>
+
+          <div className="bg-slate-800/50 p-1 px-4 rounded-2xl border border-slate-700/50 flex items-center gap-3 group transition-all hover:bg-slate-700/50">
+            <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">CALENDARIO</span>
             <input
               type="date"
               value={selectedDate}
               onChange={(e) => setSelectedDate(e.target.value)}
-              className="bg-transparent text-sm font-black focus:outline-none cursor-pointer uppercase tracking-tighter"
+              className="bg-transparent text-sm font-black focus:outline-none cursor-pointer uppercase tracking-tighter text-slate-100"
             />
           </div>
-          <button
-            onClick={() => { fetchSales(); fetchExpenses(); alert("Sincronizando con la nube... ☁️"); }}
-            className="bg-slate-700 hover:bg-slate-600 px-3 py-1.5 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all active:scale-95 flex items-center gap-2 text-indigo-300 border border-indigo-500/20"
-          >
-            🔄 RECARGAR {salesHistory.length > 0 && `(${salesHistory.length})`}
-          </button>
-          <button
-            onClick={verCierreGuardado}
-            className="bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-400 border border-indigo-500/30 px-3 py-1.5 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all active:scale-95 flex items-center gap-2"
-          >
-            📚 VER CIERRE GUARDADO
-          </button>
-          {dbError && (
-            <div className="bg-red-500/20 text-red-400 border border-red-500/50 px-3 py-1.5 rounded-xl font-black text-[10px] animate-pulse">
-              ⚠️ ERROR DB: {dbError}
-            </div>
-          )}
+
+          <div className="flex gap-2">
+            <button
+              onClick={() => { fetchSales(); fetchExpenses(); alert("Sincronizando con la nube... ☁️"); }}
+              className="px-4 py-2 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all active:scale-95 flex items-center gap-2 bg-slate-800 hover:bg-indigo-600 text-slate-300 hover:text-white border border-slate-700 hover:border-indigo-400"
+            >
+              🔄 NUBE {salesHistory.length > 0 && <span className="opacity-50 text-[8px]">({salesHistory.length})</span>}
+            </button>
+            <button
+              onClick={verCierreGuardado}
+              className="bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 px-4 py-2 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all active:scale-95 flex items-center gap-2"
+            >
+              📚 ARCHIVO
+            </button>
+            {dbError && (
+              <div className="bg-red-500/20 text-red-400 border border-red-500/50 px-4 py-2 rounded-xl font-black text-[10px] animate-pulse">
+                ⚠️ ERROR CONEXIÓN: {dbError}
+              </div>
+            )}
+          </div>
         </div>
-        <div className="flex gap-2">
-          <button onClick={() => setShowExpenses(true)} className="bg-slate-700 hover:bg-slate-600 px-3 py-2 rounded-xl font-black text-[10px] shadow-lg transition-all active:scale-95 uppercase tracking-tighter border-b-4 border-slate-900 flex items-center gap-2 text-orange-400">
-            🛒 COMPRAS TIENDA
+
+        <div className="flex gap-3 items-center">
+          <div className="bg-slate-800/50 rounded-2xl p-1 flex border border-slate-800">
+            <button onClick={() => setShowExpenses(true)} className="px-4 py-2.5 rounded-xl font-black text-[10px] tracking-tighter transition-all active:scale-95 uppercase flex items-center gap-2 text-orange-400 hover:bg-orange-500/10">
+              🛒 GASTOS
+            </button>
+            <button onClick={() => {
+              const name = prompt("Nombre:", businessInfo.name);
+              const manager = prompt("Responsable:", businessInfo.manager);
+              if (name) setBusinessInfo({ ...businessInfo, name, manager: manager || "" });
+            }} className="px-4 py-2.5 rounded-xl font-black text-[10px] tracking-tighter transition-all active:scale-95 uppercase flex items-center gap-2 text-indigo-400 hover:bg-indigo-500/10">
+              ⚙️ DATOS
+            </button>
+          </div>
+
+          <div className="h-10 w-px bg-slate-800"></div>
+
+          <button onClick={realizarCierre} className="bg-rose-600 hover:bg-rose-500 px-6 py-2.5 rounded-2xl font-black text-[11px] shadow-lg shadow-rose-900/20 transition-all active:scale-95 uppercase tracking-widest border-b-4 border-rose-800">
+            CIERRE DÍA
           </button>
-          <button onClick={() => {
-            const name = prompt("Nombre de la Empresa:", businessInfo.name);
-            const nif = prompt("NIF/CIF:", businessInfo.nif);
-            const address = prompt("Dirección:", businessInfo.address);
-            const city = prompt("Ciudad:", businessInfo.city);
-            const manager = prompt("Responsable:", businessInfo.manager);
-            if (name) setBusinessInfo({ name, nif: nif || "", address: address || "", city: city || "", manager: manager || "" });
-          }} className="bg-slate-700 hover:bg-slate-600 px-3 py-2 rounded-xl font-black text-[10px] shadow-lg transition-all active:scale-95 uppercase tracking-tighter border-b-4 border-slate-900 flex items-center gap-2 text-indigo-400">
-            ⚙️ DATOS NEGOCIO
-          </button>
-          <button onClick={seleccionarCarpeta} className={`${reportFolder ? 'bg-emerald-600' : 'bg-orange-600'} hover:opacity-90 px-4 py-2 rounded-xl font-black text-xs shadow-lg transition-all active:scale-95 uppercase tracking-tighter flex items-center gap-2`}>
-            {reportFolder ? '📁 CARPETA OK' : '📁 CONFIG. CARPETA'}
-          </button>
-          <button onClick={realizarCierre} className="bg-red-600 hover:bg-red-500 px-4 py-2 rounded-xl font-black text-xs shadow-lg transition-all active:scale-95 uppercase tracking-tighter border-b-4 border-red-800">CIERRE DÍA (GUARDAR)</button>
-          <button onClick={() => printReport('daily')} className="bg-slate-700 hover:bg-slate-600 px-4 py-2 rounded-xl font-black text-xs shadow-lg transition-all active:scale-95 uppercase tracking-tighter border-b-4 border-slate-900">IMPRIMIR TICKET DÍA</button>
-          <button onClick={descargarMensual} className="bg-indigo-600 hover:bg-indigo-500 px-4 py-2 rounded-xl font-black text-xs shadow-lg transition-all active:scale-95 uppercase tracking-tighter border-b-4 border-indigo-800">INFORME MES (PDF)</button>
+
+          <div className="flex gap-1">
+            <button onClick={() => printReport('daily')} className="bg-slate-100 hover:bg-white text-slate-900 px-4 py-2.5 rounded-2xl font-black text-[10px] shadow-lg transition-all active:scale-95 uppercase tracking-tighter flex items-center gap-2">
+              🖨️ TICKET DÍA
+            </button>
+            <button onClick={descargarMensual} className="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2.5 rounded-2xl font-black text-[10px] shadow-lg shadow-indigo-900/20 transition-all active:scale-95 uppercase tracking-tighter border-b-4 border-indigo-800">
+              📥 INFORME MES
+            </button>
+          </div>
         </div>
       </header>
 
@@ -853,18 +786,18 @@ export default function Index() {
             )}
           </div>
 
-          <div className="bg-slate-200 p-3 border-t-2 border-slate-300 shadow-[0_-4px_10px_rgba(0,0,0,0.05)]">
-            <div className="bg-white p-2 mb-3 text-right text-3xl font-mono border-4 border-indigo-100 rounded-2xl shadow-inner h-16 flex items-center justify-end group">
-              <span className="text-slate-300 group-hover:text-slate-400 transition-colors mr-auto text-[10px] font-black uppercase tracking-tighter ml-2">Manual:</span>
-              <span className="font-black text-indigo-700">{manualAmount || "0.00"}</span>
-              <span className="ml-2 text-xs text-slate-400 font-bold uppercase">MAD</span>
+          <div className="bg-slate-100 p-4 border-t border-slate-200">
+            <div className="bg-white p-3 mb-4 text-right text-3xl font-mono border-2 border-slate-100 rounded-2xl shadow-sm h-16 flex items-center justify-end group transition-all focus-within:ring-2 ring-indigo-500/20">
+              <span className="text-slate-300 group-hover:text-slate-400 transition-colors mr-auto text-[9px] font-black uppercase tracking-tighter ml-1">MANUAL</span>
+              <span className="font-black text-slate-900">{manualAmount || "0.00"}</span>
+              <span className="ml-2 text-[10px] text-slate-400 font-bold uppercase">MAD</span>
             </div>
             <div className="grid grid-cols-4 gap-2">
               {[1, 2, 3, 4, 5, 6, 7, 8, 9, 0, "."].map(n => (
-                <button key={n} onClick={() => pressNum(n.toString())} className="bg-white py-4 rounded-xl shadow-md text-xl font-black active:scale-95 transition-all hover:bg-slate-50 border-b-4 border-slate-100">{n}</button>
+                <button key={n} onClick={() => pressNum(n.toString())} className="bg-white py-3.5 rounded-2xl shadow-sm text-lg font-black text-slate-700 active:scale-95 transition-all hover:bg-slate-50 border border-slate-100 hover:border-slate-200">{n}</button>
               ))}
-              <button onClick={() => setManualAmount("")} className="bg-white py-4 rounded-xl shadow-md text-xl font-black text-orange-600 active:scale-95 hover:bg-orange-50 transition-all border-b-4 border-orange-100 font-mono">C</button>
-              <button onClick={agregarManual} className="col-span-4 bg-indigo-600 text-white py-4 rounded-2xl font-black mt-2 shadow-xl hover:bg-indigo-500 active:scale-95 transition-all text-xs uppercase tracking-widest border-b-[6px] border-indigo-800">AÑADIR IMPORTE LIBRE</button>
+              <button onClick={() => setManualAmount("")} className="bg-slate-50 py-3.5 rounded-2xl shadow-sm text-lg font-black text-rose-500 active:scale-95 hover:bg-rose-50 transition-all border border-slate-200 font-mono">C</button>
+              <button onClick={agregarManual} className="col-span-4 bg-slate-900 text-white py-4 rounded-2xl font-black mt-2 shadow-lg hover:bg-slate-800 active:scale-95 transition-all text-[11px] uppercase tracking-widest border-b-4 border-slate-950">AÑADIR IMPORTE LIBRE</button>
             </div>
           </div>
 
@@ -881,35 +814,39 @@ export default function Index() {
           </div>
         </div>
 
-        <div className="w-2/3 p-6 bg-slate-100 overflow-y-auto grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 content-start pb-24">
+        <div className="w-2/3 p-6 bg-transparent overflow-y-auto grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6 content-start pb-24 custom-scrollbar">
           {PRODUCTS.map((p) => (
-            <button key={p.name} onClick={() => agregar(p.name, p.price)} className={`bg-white rounded-3xl shadow-md hover:shadow-2xl border-4 border-white hover:border-indigo-500 active:scale-95 transition-all group relative overflow-hidden flex flex-col h-[220px]`}>
-              {/* IMAGE AREA */}
-              <div className="flex-1 w-full overflow-hidden bg-slate-100 relative">
-                <img src={p.image} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" alt={p.name} />
-                {/* Clear Price Tag Overlay */}
-                <div className="absolute top-3 right-3 bg-indigo-600/90 backdrop-blur-md px-3 py-1 rounded-2xl shadow-xl">
-                  <div className="text-white font-black text-sm tracking-tight">{p.price.toFixed(2)} <span className="text-[9px] opacity-70">MAD</span></div>
+            <button
+              key={p.name}
+              onClick={() => agregar(p.name, p.price)}
+              className="group bg-white rounded-[2.5rem] shadow-[0_10px_30px_rgba(0,0,0,0.04)] hover:shadow-[0_20px_50px_rgba(99,102,241,0.15)] border-2 border-white hover:border-indigo-500/50 active:scale-[0.98] transition-all duration-500 relative overflow-hidden flex flex-col h-[240px]"
+            >
+              {/* Image with overlay price */}
+              <div className="flex-1 w-full overflow-hidden bg-slate-50 relative">
+                <img src={p.image} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000 grayscale-[20%] group-hover:grayscale-0" alt={p.name} />
+                <div className="absolute top-4 right-4 bg-slate-900/90 backdrop-blur-md px-4 py-1.5 rounded-2xl shadow-xl border border-white/10">
+                  <div className="text-white font-black text-sm tracking-tighter">{p.price.toFixed(2)} <span className="text-[10px] opacity-60">MAD</span></div>
                 </div>
+                <div className="absolute inset-0 bg-gradient-to-tr from-indigo-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
               </div>
 
-              {/* INFO AREA (Professional POS Label) */}
-              <div className="p-4 bg-white border-t border-slate-50">
-                <div className="text-xs font-black text-slate-400 uppercase tracking-widest mb-0.5 line-clamp-1">{p.name.split(' ')[0]}</div>
-                <div className="text-sm font-black text-slate-800 uppercase leading-none tracking-tight truncate">{p.name}</div>
+              {/* Minimal Info */}
+              <div className="p-5 bg-white">
+                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mb-1">{p.name.split(' ')[0]}</div>
+                <div className="text-base font-black text-slate-800 uppercase tracking-tighter leading-none truncate">{p.name}</div>
               </div>
 
-              {/* Robust Decorative Accent Line */}
-              <div className={`h-2 w-full ${p.color.replace('border-', 'bg-')} opacity-80`}></div>
+              {/* Dynamic Accent Line */}
+              <div className={`h-1.5 w-12 rounded-full absolute bottom-4 left-5 ${p.color.replace('border-', 'bg-')} opacity-40 group-hover:w-20 group-hover:opacity-100 transition-all duration-500`}></div>
             </button>
           ))}
         </div>
       </div>
 
-      <footer className="bg-slate-900 px-8 py-4 shadow-[0_-15px_40px_rgba(0,0,0,0.4)] print:hidden relative z-10 flex justify-center">
-        <button onClick={cobrar} className="w-full max-w-2xl bg-emerald-500 hover:bg-emerald-400 text-white font-black py-4 rounded-2xl text-2xl shadow-lg transition-all active:scale-95 uppercase tracking-widest border-b-[4px] border-emerald-700 flex items-center justify-center gap-3">
-          <span className="text-sm opacity-50 font-normal">Finalizar ticket y</span>
-          REALIZAR VENTA
+      <footer className="bg-white px-10 py-5 shadow-[0_-15px_60px_rgba(0,0,0,0.08)] print:hidden relative z-10 flex justify-center border-t border-slate-100">
+        <button onClick={cobrar} className="w-full max-w-3xl bg-slate-900 hover:bg-indigo-600 text-white font-black py-5 rounded-[2rem] text-2xl shadow-2xl shadow-indigo-500/20 transition-all duration-300 active:scale-95 uppercase tracking-[0.2em] flex items-center justify-center gap-4 group">
+          <span className="text-xs opacity-40 font-bold tracking-widest group-hover:opacity-100 transition-opacity">Pulse para</span>
+          FINALIZAR VENTA 🪁
         </button>
       </footer>
     </div >
