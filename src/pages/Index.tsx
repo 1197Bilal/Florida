@@ -12,6 +12,7 @@ export default function Index() {
     return saved ? JSON.parse(saved) : [];
   });
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+  const isToday = selectedDate === new Date().toISOString().split('T')[0];
   const [manualAmount, setManualAmount] = useState("");
   const [reportType, setReportType] = useState<"daily" | "monthly" | null>(null);
   const [reportFolder, setReportFolder] = useState<FileSystemDirectoryHandle | null>(null);
@@ -29,11 +30,14 @@ export default function Index() {
   const [showExpenses, setShowExpenses] = useState(false);
   const [loadingExpenses, setLoadingExpenses] = useState(false);
   const [newExpense, setNewExpense] = useState({ amount: "", description: "" });
+  const [activeTab, setActiveTab] = useState<"carrito" | "ventas">("carrito");
   const reportRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     fetchSales();
     fetchExpenses();
+    if (!isToday) setActiveTab("ventas");
+    else setActiveTab("carrito");
   }, [selectedDate]);
 
   const fetchSales = async () => {
@@ -696,29 +700,71 @@ export default function Index() {
       <div className="flex flex-1 overflow-hidden">
         {/* Ticket Izquierda con Teclado Numérico */}
         <div className="w-1/3 bg-white border-r-2 border-slate-300 flex flex-col">
-          <div className="bg-slate-800 p-2 text-white text-[10px] font-bold flex justify-between uppercase tracking-widest">
-            <span>Ticket Actual</span>
-            <span className="text-emerald-400 italic font-black">Venta Abierta</span>
+          <div className="bg-slate-800 flex border-b border-slate-700">
+            <button
+              onClick={() => setActiveTab("carrito")}
+              className={`flex-1 py-3 text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'carrito' ? 'bg-slate-900 text-emerald-400 border-b-2 border-emerald-500' : 'text-slate-500 hover:text-slate-300'}`}
+            >
+              🛒 Ticket Actual
+            </button>
+            <button
+              onClick={() => setActiveTab("ventas")}
+              className={`flex-1 py-3 text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'ventas' ? 'bg-slate-900 text-indigo-400 border-b-2 border-indigo-500' : 'text-slate-500 hover:text-slate-300'}`}
+            >
+              📜 Ventas {selectedDate === new Date().toISOString().split('T')[0] ? 'Hoy' : 'Día'} ({salesAtSelectedDate.length})
+            </button>
           </div>
           <div className="flex-1 overflow-y-auto bg-slate-50 shadow-inner">
-            {carrito.length === 0 ? (
-              <div className="h-full flex flex-col items-center justify-center text-slate-300 p-10 text-center gap-4 group">
-                <div className="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center text-4xl group-hover:scale-110 transition-transform duration-500">☕</div>
-                <p className="font-bold text-xs uppercase tracking-widest leading-relaxed">Carrito vacío<br />Selecciona un producto</p>
-              </div>
-            ) : (
-              carrito.map((item) => (
-                <div key={item.id} className="flex justify-between p-3 border-b border-slate-200 items-center animate-in fade-in slide-in-from-left-2 duration-200 hover:bg-white transition-colors">
-                  <button onClick={() => eliminarUno(item.id)} className="w-10 h-10 flex items-center justify-center bg-red-50 text-red-500 rounded-xl font-bold transition-all hover:bg-red-500 hover:text-white active:scale-90 shadow-sm">✕</button>
-                  <div className="flex-1 px-4">
-                    <div className="text-base font-black text-slate-800 uppercase tracking-tight leading-4">{item.name}</div>
-                    <div className="flex items-center gap-1 text-[11px] text-indigo-500 font-black bg-indigo-50 w-fit px-2 py-0.5 rounded-full mt-1.5 shadow-sm">
-                      <span className="opacity-70 text-[10px]">🕒</span> {item.time}
-                    </div>
-                  </div>
-                  <span className="font-black text-indigo-700 text-xl tracking-tighter">{item.price.toFixed(2)} <span className="text-[10px]">MAD</span></span>
+            {activeTab === "carrito" ? (
+              carrito.length === 0 ? (
+                <div className="h-full flex flex-col items-center justify-center text-slate-300 p-10 text-center gap-4 group">
+                  <div className="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center text-4xl group-hover:scale-110 transition-transform duration-500">☕</div>
+                  <p className="font-bold text-xs uppercase tracking-widest leading-relaxed">Carrito vacío<br />Selecciona un producto</p>
                 </div>
-              ))
+              ) : (
+                carrito.map((item) => (
+                  <div key={item.id} className="flex justify-between p-3 border-b border-slate-200 items-center animate-in fade-in slide-in-from-left-2 duration-200 hover:bg-white transition-colors">
+                    <button onClick={() => eliminarUno(item.id)} className="w-10 h-10 flex items-center justify-center bg-red-50 text-red-500 rounded-xl font-bold transition-all hover:bg-red-500 hover:text-white active:scale-90 shadow-sm">✕</button>
+                    <div className="flex-1 px-4">
+                      <div className="text-base font-black text-slate-800 uppercase tracking-tight leading-4">{item.name}</div>
+                      <div className="flex items-center gap-1 text-[11px] text-indigo-500 font-black bg-indigo-50 w-fit px-2 py-0.5 rounded-full mt-1.5 shadow-sm">
+                        <span className="opacity-70 text-[10px]">🕒</span> {item.time}
+                      </div>
+                    </div>
+                    <span className="font-black text-indigo-700 text-xl tracking-tighter">{item.price.toFixed(2)} <span className="text-[10px]">MAD</span></span>
+                  </div>
+                ))
+              )
+            ) : (
+              /* TAB VENTAS REALIZADAS */
+              salesAtSelectedDate.length === 0 ? (
+                <div className="h-full flex flex-col items-center justify-center text-slate-300 p-10 text-center gap-4">
+                  <div className="text-5xl">📄</div>
+                  <p className="font-bold text-xs uppercase tracking-widest leading-relaxed">No hay ventas<br />registradas este día</p>
+                </div>
+              ) : (
+                <div className="divide-y divide-slate-200">
+                  {salesAtSelectedDate.map((sale: Sale, idx: number) => (
+                    <div key={sale.id} className="p-4 hover:bg-white transition-colors">
+                      <div className="flex justify-between items-start mb-2">
+                        <div>
+                          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Venta #{salesAtSelectedDate.length - idx}</p>
+                          <p className="text-[11px] font-bold text-indigo-500 bg-indigo-50 px-2 py-0.5 rounded-full w-fit">{new Date(sale.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+                        </div>
+                        <p className="text-xl font-black text-slate-900">{sale.total.toFixed(2)} <span className="text-[10px]">MAD</span></p>
+                      </div>
+                      <div className="space-y-1">
+                        {sale.items.map((item, iidx) => (
+                          <div key={iidx} className="text-[10px] font-bold text-slate-500 uppercase flex justify-between">
+                            <span>- {item.name}</span>
+                            <span>{item.price.toFixed(2)}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )
             )}
           </div>
 
