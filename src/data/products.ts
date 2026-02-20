@@ -15,8 +15,7 @@ export const PRODUCTS: Product[] = [
     // PARA PICAR / DESAYUNO
     { name: "Khobza", price: 5.00, image: "khobza.jpg", color: "border-amber-200" },
     { name: "Msemen", price: 10.00, image: "msemen-v2.jpg", color: "border-yellow-600" },
-    { name: "R3ayef (Meloui)", price: 10.00, image: "https://images.unsplash.com/photo-1599307734170-698f88f00007?w=600&auto=format&fit=crop", color: "border-orange-500" },
     { name: "Croissant", price: 10.00, image: "https://images.pexels.com/photos/3892469/pexels-photo-3892469.jpeg?auto=compress&cs=tinysrgb&w=600", color: "border-yellow-500" },
-    { name: "Huevos", price: 15.00, image: "https://images.pexels.com/photos/5945848/pexels-photo-5945848.jpeg?auto=compress&cs=tinysrgb&w=600", color: "border-yellow-300" },
+    { name: "Huevos", price: 15.00, image: "huevos-v2.jpg", color: "border-yellow-300" },
 ];
 
