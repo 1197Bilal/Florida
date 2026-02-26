@@ -110,6 +110,45 @@ export default function Dashboard() {
         ],
     };
 
+    // Chart Data: Hourly Sales
+    const hourlyData = sales.reduce((acc: any, s) => {
+        const hour = new Date(s.timestamp).getHours();
+        acc[hour] = (acc[hour] || 0) + s.total;
+        return acc;
+    }, {});
+
+    const hourlyChartData = {
+        labels: Array.from({ length: 24 }, (_, i) => `${i}:00`),
+        datasets: [
+            {
+                label: "Ventas por Hora (MAD)",
+                data: Array.from({ length: 24 }, (_, i) => hourlyData[i] || 0),
+                backgroundColor: "rgba(99, 102, 241, 0.8)",
+                borderRadius: 8,
+            },
+        ],
+    };
+
+    // Chart Data: Weekday Sales
+    const days = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
+    const weekdayData = sales.reduce((acc: any, s) => {
+        const day = new Date(s.timestamp).getDay();
+        acc[day] = (acc[day] || 0) + s.total;
+        return acc;
+    }, {});
+
+    const weekdayChartData = {
+        labels: ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"],
+        datasets: [
+            {
+                label: "Ventas por Día (MAD)",
+                data: [1, 2, 3, 4, 5, 6, 0].map(d => weekdayData[d] || 0),
+                backgroundColor: "rgba(45, 212, 191, 0.8)",
+                borderRadius: 8,
+            },
+        ],
+    };
+
     if (loading) {
         return (
             <div className="h-screen bg-slate-900 flex items-center justify-center text-white">
@@ -145,20 +184,46 @@ export default function Dashboard() {
                     <StatCard title="Beneficio Neto" value={`${profit.toFixed(2)} MAD`} icon={<Wallet className="text-orange-400" />} color="border-l-orange-500" />
                 </div>
 
-                {/* Charts Section */}
+                {/* Main Evolution Chart */}
+                <div className="bg-slate-900/50 rounded-3xl p-6 border border-white/5 shadow-xl">
+                    <h3 className="text-lg font-bold mb-6 flex items-center gap-2">📈 Evolución Histórica (Mensual)</h3>
+                    <div className="h-72">
+                        {Object.keys(monthlyData).length > 0 ? (
+                            <Line data={lineChartData} options={{ maintainAspectRatio: false }} />
+                        ) : (
+                            <div className="h-full flex items-center justify-center text-slate-600 italic">No hay historial de ventas suficiente</div>
+                        )}
+                    </div>
+                </div>
+
+                {/* Detailed Charts Grid */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                     <div className="bg-slate-900/50 rounded-3xl p-6 border border-white/5 shadow-xl">
-                        <h3 className="text-lg font-bold mb-6 flex items-center gap-2">📈 Evolución Mensual</h3>
+                        <h3 className="text-lg font-bold mb-6 flex items-center gap-2">🕒 Ventas por Hora</h3>
                         <div className="h-64">
-                            {Object.keys(monthlyData).length > 0 ? (
-                                <Line data={lineChartData} options={{ maintainAspectRatio: false }} />
+                            {sales.length > 0 ? (
+                                <Bar data={hourlyChartData} options={{ maintainAspectRatio: false }} />
                             ) : (
-                                <div className="h-full flex items-center justify-center text-slate-600 italic">No hay historial de ventas suficiente</div>
+                                <div className="h-full flex items-center justify-center text-slate-600 italic">Sin datos horarios</div>
                             )}
                         </div>
                     </div>
                     <div className="bg-slate-900/50 rounded-3xl p-6 border border-white/5 shadow-xl">
-                        <h3 className="text-lg font-bold mb-6 flex items-center gap-2">🌮 Top 5 Productos</h3>
+                        <h3 className="text-lg font-bold mb-6 flex items-center gap-2">📅 Actividad por Semana</h3>
+                        <div className="h-64">
+                            {sales.length > 0 ? (
+                                <Bar data={weekdayChartData} options={{ maintainAspectRatio: false }} />
+                            ) : (
+                                <div className="h-full flex items-center justify-center text-slate-600 italic">Sin datos semanales</div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+
+                {/* Products and Table Grid */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <div className="bg-slate-900/50 lg:col-span-1 rounded-3xl p-6 border border-white/5 shadow-xl">
+                        <h3 className="text-lg font-bold mb-6 flex items-center gap-2">🌮 Top Productos</h3>
                         <div className="h-64">
                             {topProducts.length > 0 ? (
                                 <Doughnut data={doughnutData} options={{ maintainAspectRatio: false }} />
@@ -167,36 +232,35 @@ export default function Dashboard() {
                             )}
                         </div>
                     </div>
-                </div>
 
-                {/* Recent Sales Table */}
-                <div className="bg-slate-900/50 rounded-3xl p-8 border border-white/5 shadow-xl">
-                    <h3 className="text-xl font-bold mb-8 uppercase tracking-tight">Últimas Transacciones</h3>
-                    <div className="overflow-x-auto">
-                        {sales.length > 0 ? (
-                            <table className="w-full text-left">
-                                <thead>
-                                    <tr className="text-slate-500 text-[10px] uppercase font-black border-b border-white/5">
-                                        <th className="pb-4">Fecha/Hora</th>
-                                        <th className="pb-4">Concepto</th>
-                                        <th className="pb-4 text-right">Importe</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-white/5">
-                                    {sales.slice(-10).reverse().map((sale) => (
-                                        <tr key={sale.id} className="hover:bg-white/5 transition-colors">
-                                            <td className="py-4 text-sm font-bold">{new Date(sale.timestamp).toLocaleString()}</td>
-                                            <td className="py-4 text-sm text-slate-400 italic">
-                                                {sale.items.map((i: any) => i.name).join(", ")}
-                                            </td>
-                                            <td className="py-4 text-right font-black text-emerald-400">{sale.total.toFixed(2)} MAD</td>
+                    <div className="bg-slate-900/50 lg:col-span-2 rounded-3xl p-8 border border-white/5 shadow-xl">
+                        <h3 className="text-xl font-bold mb-8 uppercase tracking-tight">Últimas Transacciones</h3>
+                        <div className="overflow-x-auto">
+                            {sales.length > 0 ? (
+                                <table className="w-full text-left">
+                                    <thead>
+                                        <tr className="text-slate-500 text-[10px] uppercase font-black border-b border-white/5">
+                                            <th className="pb-4">Fecha/Hora</th>
+                                            <th className="pb-4">Concepto</th>
+                                            <th className="pb-4 text-right">Importe</th>
                                         </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        ) : (
-                            <div className="text-center py-10 text-slate-500 italic">No se han encontrado ventas registradas</div>
-                        )}
+                                    </thead>
+                                    <tbody className="divide-y divide-white/5">
+                                        {sales.slice(-10).reverse().map((sale) => (
+                                            <tr key={sale.id} className="hover:bg-white/5 transition-colors">
+                                                <td className="py-4 text-sm font-bold">{new Date(sale.timestamp).toLocaleString()}</td>
+                                                <td className="py-4 text-sm text-slate-400 italic">
+                                                    {sale.items.map((i: any) => i.name).join(", ")}
+                                                </td>
+                                                <td className="py-4 text-right font-black text-emerald-400">{sale.total.toFixed(2)} MAD</td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            ) : (
+                                <div className="text-center py-10 text-slate-500 italic">No se han encontrado ventas registradas</div>
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>
