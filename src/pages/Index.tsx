@@ -738,6 +738,10 @@ export default function Index() {
 
           <div className="h-10 w-px bg-slate-800 hidden md:block"></div>
 
+          <a href="/dashboard" className="bg-indigo-600 hover:bg-indigo-500 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all active:scale-95 shadow-lg border-b-4 border-indigo-900">
+            📊 DASHBOARD
+          </a>
+
           <div className="bg-slate-800/50 p-1 px-4 rounded-2xl border border-slate-700/50 flex items-center gap-3 group transition-all hover:bg-slate-700/50">
             <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">CALENDARIO</span>
             <input

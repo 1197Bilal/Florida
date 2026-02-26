@@ -7,4 +7,11 @@ if (!supabaseUrl || supabaseUrl.includes('placeholder')) {
     console.warn('⚠️ Supabase environment variables are missing! Cloud sync will not work.');
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+    auth: {
+        persistSession: true,
+        autoRefreshToken: true,
+        detectSessionInUrl: true,
+        storageKey: 'florida-pos-session'
+    }
+});
